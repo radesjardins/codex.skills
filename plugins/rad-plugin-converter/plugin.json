@@ -1,0 +1,21 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "rad-plugin-converter",
+  "version": "1.0.0",
+  "description": "Audit and convert Claude Code, Codex, legacy, and mixed plugin packages to Agent Plugins 1.0.0.",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-plugin-converter",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "keywords": [
+    "agent-plugins",
+    "agent-skills",
+    "claude-code",
+    "codex",
+    "plugin-conversion",
+    "migration"
+  ]
+}
