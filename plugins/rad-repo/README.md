@@ -5,6 +5,11 @@ agent-facing documentation authoritative, discovers scoped instructions, validat
 finite initiatives, and gates shipping on reviewed changes and repository-declared
 checks.
 
+The default `core` profile uses one instruction contract, one current handoff, and
+Git-based ship checks. The `full` profile adds deeper document reconcile and
+alignment. A first `adopt` recommends one full pass, then routine work returns to
+core.
+
 ## Context stack
 
 | Level | Source | Purpose |
@@ -26,20 +31,27 @@ approved future work, and handoff records session state.
 |---|---|
 | `startup` | Read-only orientation, instruction map, trust report, mechanical scans |
 | `wrapup` | Refresh handoff with Git evidence and validation results |
-| `ship` | Review and stage intended paths, run the pre-ship gate, commit, push, verify |
+| `ship` | Review and stage intended paths, run the pre-ship gate, commit, and push |
+| `doctor` | Explain command sources, local trust, path scopes, and plugin resources |
+| `complexity-audit` | Rank code maintenance hotspots from Git evidence, on request |
 | `repo-init` | Create the minimal greenfield context container |
 | `adopt` | Archaeology-first brownfield onboarding without code edits |
 | `repo-align` | Deep context, instruction, initiative, vocabulary, and drift correction |
 
 ## Repository contract
 
-Validation commands come from labeled backtick commands in applicable `AGENTS.md`
-files and optional `.rad-repo.json` entries. Root instructions are defaults;
+Validation commands come from labeled commands in applicable `AGENTS.md` files and
+optional `.rad-repo.json` entries. Root instructions are defaults;
 the closest scoped `AGENTS.md` adds commands and constraints for changed paths.
+
+Run `scripts/repo-doctor.py` to see each command and source. The owner approves the
+exact command set once per clone. Approval stays in local Git settings and expires
+when a command changes.
 
 Start from `templates/repo.json` when configuration is useful. It supports:
 
 - vocabulary modes `advisory`, `strict`, and `off`, with `all` or `headings` scope;
+- workflow profiles `core` and `full`;
 - global and path-scoped validation commands;
 - an explicit empty-validation exception for repositories with nothing executable;
 - protected paths, generated-directory rules, and a staged-file size limit.
@@ -50,9 +62,15 @@ Start from `templates/repo.json` when configuration is useful. It supports:
 python scripts/pre_ship.py . --run-validation --json
 ```
 
-The gate blocks secrets, protected paths, unexpected generated output, large files,
+The gate blocks high-confidence secret patterns, protected paths, unexpected generated output, large files,
 failed checks, and missing validation declarations. Contract changes require staged
 diff review plus `--allow-contract-change`; unstaged contract edits always block.
+
+Normal `ship` stops after push. `ship and verify deploy` adds one read-only deploy
+check. It never starts a polling loop.
+
+Normal `wrapup` records closure and does not commit. `wrapup and commit` creates one
+local documentation commit. `wrapup and ship` uses the full ship workflow.
 
 ## Active initiatives
 
@@ -81,6 +99,8 @@ user-owned instruction audit.
 - Ask before destructive actions, contract changes, or unresolved structural edits.
 - Preserve user-owned instruction content unless explicitly authorized to rewrite it.
 - Challenge once with evidence, then commit to the owner's decision.
+- Suggest a RAD Plan skill only when it is currently available and evidence shows a
+  planning need. Invoke it only after the owner asks or accepts the suggestion.
 - Do not present heuristic findings as semantic proof.
 - Never commit secrets, force-push, or push/deploy unless the invoked workflow grants
   that authorization.

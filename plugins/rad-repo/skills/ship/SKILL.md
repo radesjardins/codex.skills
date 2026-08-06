@@ -2,51 +2,40 @@
 name: ship
 description: >
   This skill should be used when the user says "ship", "ship it", "close out and
-  push", "wrap and ship", "wrap it up and push", "send it", "close-out", "commit
-  and push everything", or "end the session and push". The one-command close-out
-  chain: align-lite → quick wrapup → reviewed staging → contract validation →
-  conventional commit → push → deploy-verify (only when AGENTS.md declares a deploy:
-  target) → stray branch/worktree sweep → one-line report. Invoking `ship` is the
-  owner's authorization to commit and push — no re-asking. Target: under three
-  minutes including deploy verification.
+  push", "wrap and ship", "send it", "commit and push everything", or "end the
+  session and push". It refreshes the handoff, stages reviewed paths, checks the
+  local repository contract, runs approved validation, commits, pushes, and reports
+  the exact state. Normal ship stops after push. "Ship and verify deploy" adds one
+  bounded deployment check with no polling loop. Invoking ship authorizes commit and
+  push. It does not authorize a force-push, merge, deploy action, or deletion.
 allowed-tools: Read Glob Grep Bash Write Edit AskUserQuestion
 ---
 
-# Ship — the close-out chain
+# Ship
 
-The hand-typed ritual (align → wrapup → commit → push → "did it deploy?") as one
-workflow. **Invoking `ship` is the owner's commit-and-push authorization** — do not
-ask again before committing or pushing; that consent is the point of the skill. Ask
-only when something is genuinely wrong (a conflict, a failed push, a red scan the
-owner should see before publishing).
+Close the work with reviewed Git state and repository checks. Invoking `ship` authorizes the commit and push. Do not ask again for those two actions.
 
-Run the chain in order; each link is cheap. Resolve plugin resources relative to this
-skill file.
+## 1. Mechanical context check
 
-## 1. Align-lite — mechanical scans only
+Run the cheap repository and freshness scans. Report findings. They do not block ship unless they expose a real safety or contract problem.
 
-```bash
-PLUGIN_ROOT="../../"
-python3 "$PLUGIN_ROOT/scripts/repo-scan.py" . --json --no-record
-python3 "$PLUGIN_ROOT/scripts/doc-freshness.py" . --json
+```powershell
+python ../../scripts/repo-scan.py . --json --no-record
+python ../../scripts/doc-freshness.py . --json
 ```
-
-(`python` on Windows; skip silently if Python is unavailable.) No judgment passes, no
-proposals, no fixes — this is a smoke check, not `repo-align`. Red findings go into
-the final report as one line each; nothing here blocks the ship unless the owner
-says so.
 
 ## 2. Quick wrapup
 
-Run the quick path of `wrapup` inline: overwrite `docs/handoff.md`
-(≤60 lines) from git evidence, carry the `## Deferred — do not re-raise` section
-forward, ask the two questions (decisions settled? → append `docs/decisions.md`;
-lessons? → append `docs/lessons.md`). This is the only interactive moment on a green
-ship.
+Run the normal wrapup steps inline. Preserve useful handoff detail. Ask about a decision or lesson only when session evidence gives a real candidate.
 
-## 3. Reviewed staging
+Suggest a RAD Plan skill only when a real planning need exists and the exact skill
+appears in the current available-skill list. When it is unavailable, report the need
+without naming RAD Plan. Do not invoke it unless the owner asks or accepts the
+suggestion.
 
-```bash
+## 3. Review and stage
+
+```powershell
 git status --short
 git diff --stat
 git add -- <reviewed-paths>
@@ -54,96 +43,61 @@ git diff --cached --stat
 git diff --cached --check
 ```
 
-Never use `git add -A`. Stage only paths verified as part of the requested change.
-Inspect the staged summary and stop if unrelated files, conflict markers, or
-whitespace errors appear. If the tree is clean and the handoff did not change,
-skip the remaining commit-and-push steps and say so.
+Never use `git add -A`. Stage only requested work and wrapup documents. Stop for unrelated paths, conflict markers, or whitespace errors.
 
-## 4. Pre-ship contract gate
+## 4. Explain and trust the contract
 
-Run the staged safety and validation gate:
+Run:
 
-```bash
-python3 "$PLUGIN_ROOT/scripts/pre_ship.py" . --run-validation --json
+```powershell
+python ../../scripts/repo-doctor.py . --json
 ```
 
-(`python` on Windows.) This blocks protected paths, likely secrets, generated
-output, oversized files, failed commands, and a repository with no declared
-validation. Validation comes from `.rad-repo.json` plus the root and
-applicable scoped `AGENTS.md` files. A repository with no mechanical check must
-declare `validation.allow_empty: true` explicitly.
+If validation is missing, fix the declaration with owner approval. If command approval is required, show the exact commands and sources. After explicit approval, run:
 
-If `AGENTS.md` or `.rad-repo.json` is staged, show its staged diff and ask
-the owner to approve the contract change. Only then rerun with
-`--allow-contract-change`. Any unstaged root or scoped contract edit remains blocking;
-stage and review it or restore it. Never bypass any other finding.
-
-## 5. Commit — conventional message
-
-```bash
-git commit -m "<type>(<scope>): <summary from the staged diff>"
+```powershell
+python ../../scripts/repo-doctor.py . --approve --json
 ```
 
-Use conventional-commit style (`feat:`, `fix:`, `docs:`, `chore:`…), grounded in
-the staged diff. Use the user's message hint if supplied.
+The approval stays in local Git settings. A changed command requires new approval.
 
-## 6. Push
+## 5. Run the pre-ship gate
 
-```bash
-git push origin main
+```powershell
+python ../../scripts/pre_ship.py . --run-validation --json
 ```
 
-If the current branch isn't `main`, push the current branch and say so plainly —
-don't silently merge or switch branches. If the push is rejected (diverged), stop
-and surface it; never force-push.
+The gate checks staged blobs, high-confidence secret patterns, protected paths, generated output, file size, reviewed contract changes, local command trust, and validation results.
 
-## 7. Deploy-verify — only when declared
+If `AGENTS.md` or `.rad-repo.json` is staged, show its staged diff and ask the owner to approve that contract change. Then rerun with `--allow-contract-change`. This flag does not bypass other findings.
 
-Read `AGENTS.md` for a `deploy:` line. **No `deploy:` target (or `deploy: none`) →
-skip this step silently.**
+## 6. Commit and push
 
-When a target is declared (e.g. `deploy: coolify`):
+Create a conventional commit message from the staged diff. Use the user's message hint when supplied.
 
-- If the rad-coolify-orchestrator MCP tools are available, poll the deployment
-  (`coolify_list_running_deployments` / `coolify_get_deployment` for the app) until
-  it reports live or failed — report the outcome *before* asking the owner to test
-  anything.
-- If the MCP tools are not available (not installed, not authenticated, or a
-  non-Coolify target with no tooling), degrade gracefully: say plainly "pushed —
-  deploy target `<target>` declared but I can't verify it from here; check it
-  manually" and move on. Never claim a deploy succeeded that you did not observe.
+Push the current branch. If it is not `main`, state the branch name. Stop on a rejected push. Never force-push, merge, or switch branches without a separate request.
 
-## 8. Stray branch / worktree sweep
+## 7. Optional deploy check
 
-```bash
-git branch --merged main
-git worktree list
-```
+Skip deployment checks during normal ship.
 
-Report merged local branches and leftover worktrees; delete only on the owner's
-one-word OK (deletion is the one irreversible act in the chain, so it stays gated).
+Run one check only when the original request includes `ship and verify deploy`, `check deploy after ship`, or an equally clear request. Read the declared `deploy:` target. Use one available read-only status or health check. Do not poll, wait for completion, restart a service, or start a deploy.
 
-## 9. One-line report
+If the deployment is still running, report `running` and stop. If no read-only tool is available, report `unverified` and stop.
+
+## 8. Report local leftovers
+
+List merged local branches and worktrees. Do not delete them without a separate owner approval.
+
+## Final report
 
 ```text
-Shipped: <commit hash> pushed to origin/main · deploy <live/failed/skipped/unverified> · handoff fresh · <N> scan note(s) · <N> stray branch(es)
+Shipped: <commit> pushed to <remote/branch>
+Handoff: <fresh / size note>
+Validation: <commands and result>
+Deploy: <not requested / live / failed / running / unverified>
+Working tree: <clean / remaining paths>
+Local leftovers: <count>
 ```
 
-Anything yellow/red from step 1 gets one extra line each, pointing at `repo-align`.
-
-## What this skill does NOT do
-
-- No deep alignment pass, no doc filing, no reconcile — mechanical scans only
-  (that's `repo-align` / `wrapup --full`).
-- Never force-pushes, never merges branches, never deletes branches/worktrees
-  without the owner's explicit OK.
-- Never stages unreviewed paths or bypasses a pre-ship blocking finding.
-- Never claims a deploy result it didn't observe.
-- On the **first** `ship` in a repo whose AGENTS.md has no fit-out record: run the
-  fit-out step first (`../../references/fit-out.md`) — detect traits, propose
-  the equipment menu once, install what's approved, then continue the chain.
-
-## References
-
-- `../../references/shelf-spec.md` — budgets, Deferred ledger, entry formats
-- `../../references/fit-out.md` — trait detection + equipment menu (first ship)
+Stop after this report. First-use fit-out belongs in `adopt` or an explicit fit-out request. It never runs inside ship.

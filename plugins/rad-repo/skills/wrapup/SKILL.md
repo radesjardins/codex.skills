@@ -3,149 +3,107 @@ name: wrapup
 description: >
   This skill should be used when the user says "wrapup", "wrap up", "end of
   session", "save state", "handoff", "leave a clean stopping point", "I'm done for
-  now", or "before I close". Quick by default (target under a minute): overwrites
-  docs/handoff.md (≤60 lines) from git evidence — not chat memory — carrying the
-  Deferred ledger forward, then asks exactly two questions: any decisions settled
-  this session (append to docs/decisions.md)? anything blow up worth remembering
-  (append to docs/lessons.md)? The deeper reconcile pass — checking whether the
-  session left plan/prd/AGENTS.md stale and drafting per-edit-confirmed fixes —
-  runs only with --full (weekly use). No status/roadmap files, no auto-commit or
-  push, never runs tests.
+  now", or "before I close". It refreshes docs/handoff.md from Git evidence, keeps
+  useful recovery detail, carries the Deferred ledger forward, and ends with an
+  exact closure report. "Wrapup and commit" commits only approved handoff documents.
+  "Wrapup and ship" uses the ship workflow. The full form adds a session-scoped
+  document reconcile. It does not run tests or push.
 allowed-tools: Read Glob Grep Bash Write Edit AskUserQuestion
 ---
 
-# Wrapup — leave a clean handoff, fast
+# Wrapup
 
-End the session at a spot a fresh chat (or a post-compaction continuation) can resume
-from cold. **Quick is the default** — the observed alternative to a fast wrapup is no
-wrapup. `--full` adds the reconcile pass; the whole-repo audit stays in
-`repo-align`.
+Leave enough evidence for a new session to continue without guesswork. The default target is under one minute.
 
-**Two hard rules:**
+## Hard rules
 
-- **The one required output is an overwritten `docs/handoff.md`.** Always write it —
-  even if nothing changed this session (then it just snapshots the current resting
-  state). Never finish `wrapup` without having written it.
-- **Do not run tests, builds, linters, or any command beyond the read-only git
-  inspection in step 1.** `wrapup` only *records* validation that already ran this
-  session; it never runs validation itself.
+- Use Git and recorded command output as evidence.
+- Record validation that already ran. Do not run tests, builds, or linters.
+- Read the current handoff before editing it.
+- Preserve recovery facts that a new agent would need.
+- Carry `## Deferred - do not re-raise` forward. Remove an item only when its wake condition fired or the owner closed it.
+- Do not push.
 
-## Quick path (default)
+## 1. Gather evidence
 
-### 1. Gather evidence (not memory)
+Run in one batch:
 
-In one batch:
-
-```bash
+```powershell
 git status --short
 git diff --stat
 git log --oneline -10
+git branch --show-current
+git rev-parse HEAD
+git rev-parse --abbrev-ref --symbolic-full-name '@{u}'
 ```
 
-Determine what changed from the working tree, staged files, and recent commits — not
-from a chat summary. For the Validation line, report only what *already* ran this
-session (do **not** re-run), including applicable contract commands resolved from
-root/scoped `AGENTS.md` and `.rad-repo.json`: take it from the conversation, or — after compaction —
-from what the compaction summary preserved. If neither source has it, write
-"Not recorded this session" — never invent a result.
+Use the conversation only for validation output that ran during this session. If no proof exists, write `Not recorded this session.`
 
-### 2. Overwrite the handoff snapshot
+## 2. Refresh the handoff
 
-Read the current `docs/handoff.md` first — **its `## Deferred — do not re-raise`
-section carries forward verbatim** (prune an item only if its wake condition visibly
-fired; say so when you do). Then overwrite the file from
-`../../templates/handoff.md` relative to this skill file. Create `docs/` first if it
-doesn't exist. Keep the whole
-file **≤60 lines** (its L1 budget). Stamp `**Updated:**` with today's date (failing
-that, `git log -1 --format=%cs` — don't ask). The shape:
+Use `../../templates/handoff.md` as the shape.
 
-- **Last completed** — 1–3 bullets grounded in the diff / commits / test output.
-- **Current focus** — the current milestone or active task from `docs/plan.md`, if present.
-- **Next action** — the single next step to pick up.
-- **Validation** — commands run this session and their result, or "Not run this session."
-- **Watchouts** — only material gotchas; omit if none.
-- **Deferred — do not re-raise** — carried forward, plus anything the owner parked
-  this session, each as `- <item> (wake: <condition or never>)`.
+Edit the current handoff instead of replacing useful content with a shorter summary. Keep accurate reconstruction detail. Update stale facts and remove repeated history.
 
-### 3. The two questions
+The normal target is 60 lines. If the active work needs more detail, link to the current file under `docs/initiatives/`. When no approved initiative holds the detail, preserve the useful handoff content and report the size note. Do not create a new status or resume document.
 
-Ask both in one AskUserQuestion round (or `ask_question` on Antigravity), then stop:
+Required sections:
 
-1. **"Any decisions get settled this session?"** — for each one the user names,
-   **append** one dated line to `docs/decisions.md` (create it with a `# Decisions`
-   header if absent): `- YYYY-MM-DD · <decision> (<one-line why>)`. Settled
-   *visual/design* decisions go to `docs/design.md` instead (it's the sole
-   design-system source) — propose that edit and apply on the user's OK.
-2. **"Anything blow up that's worth remembering?"** — for each, **append** one dated
-   line to `docs/lessons.md` (create with a `# Lessons` header if absent).
+- Last completed
+- Current focus
+- Next action
+- Validation
+- Watchouts, when needed
+- Deferred - do not re-raise
 
-Appends only — never edit existing entries (see
-`../../references/shelf-spec.md`). A "no" to both means write nothing.
+Add the current branch and working-tree state. Use one next action.
 
-That's the quick path. Report the handoff is written and stop — no scans, no
-reconcile, no commit. (If the latest `startup` trust report was red — handoff
->10 commits behind — mention once that `--full` or `repo-align` is worth it
-soon.)
+## 3. Record durable facts only when evidence exists
 
-## `--full` — the reconcile pass (weekly)
+If the session appears to have settled a lasting decision, show the candidate and ask whether to append it to `docs/decisions.md`.
 
-Everything above, plus:
+If a failure produced a reusable lesson, show the candidate and ask whether to append it to `docs/lessons.md`.
 
-### 4. Reconcile the core docs with this session
+Ask both in one round when both exist. Skip these questions when no candidate exists. Append dated lines only. Design-system decisions belong in `docs/design.md` and require approval for that exact edit.
 
-Check whether *this session's changes* left `AGENTS.md`, `docs/prd.md`, or
-`docs/plan.md` stale — scoped to what actually changed (the diff/commits above),
-**not** a whole-repo audit (that's `repo-align`). Split by ownership:
+## 4. Choose the requested close
 
-- **Docs this plugin owns — `AGENTS.md` operational sections.** Offer the specific,
-  scoped update (one line each: what's stale → what it should say) and apply on the
-  user's OK. Respect the 40-line budget — if a needed addition would blow it, that's
-  a rules-audit signal for `repo-align`, not a reason to overflow.
-- **`docs/plan.md` — the planner's file.** Status-level touches only (a task shipped,
-  the current milestone advanced) on the user's OK, refreshing its `**Updated:**`
-  stamp. **If the divergence is structural** — milestones obsolete, scope shifted,
-  the "Now" release essentially shipped — don't restructure: recommend
-  the planning workflow.
-- **Docs the user owns — `docs/prd.md`, `docs/design.md`.** Draft the exact edit
-  (old → new) and ask per doc via AskUserQuestion: **apply / skip / let me reword**.
-  Apply only on an explicit "apply" for that specific edit — never bundle user-owned
-  edits into a blanket OK. A skipped edit is restated in one line at the end so it
-  isn't silently lost.
+### Normal `wrapup`
 
-### 5. Hygiene pulse — one line, no audit
+Write the handoff and leave repository changes uncommitted.
 
-Run the cheap mechanical scan (`python3`, or `python` on Windows):
+### `wrapup and commit`
 
-```bash
-PLUGIN_ROOT="../../"
-python3 "$PLUGIN_ROOT/scripts/repo-scan.py" . --json --no-record
+This phrase authorizes one local documentation commit. Stage only the handoff and the approved decision, lesson, or plan-status files changed by this wrapup. Run `git diff --cached --check`.
+
+If unrelated paths are already staged, stop and show them. Do not mix them into the wrapup commit. When the staged set is clean, commit with `docs: record session handoff`. Do not push.
+
+### `wrapup and ship`
+
+Use the `ship` workflow. Let ship own the commit and push.
+
+## 5. Full reconcile
+
+Run this only when the user asks for a full wrapup or the repository profile is `full`.
+
+- Check whether this session made `AGENTS.md`, `docs/prd.md`, or `docs/plan.md` stale.
+- Propose exact edits and ask per user-owned document.
+- Make status-only plan edits. A structural plan change creates a planning need.
+  Name a RAD Plan skill only when the exact skill is in the current available-skill
+  list. Otherwise, report the need without naming RAD Plan. Invoke it only when the
+  owner asks or accepts the suggestion.
+- Run the cheap `repo-scan.py` hygiene check. Report findings without fixing them.
+
+## Closure report
+
+```text
+Wrapup:
+Handoff:      <updated / already current / preserved with size note>
+Commit:       <not requested / hash>
+Push:         not requested
+Working tree: <clean / changed paths remain>
+Validation:   <recorded result / not recorded>
+Next action:  <one action>
 ```
 
-If green, say nothing. If loose ends exist, add **one line** naming them and pointing
-at `repo-align` — do not file, move, or fix anything here. (Skip silently if Python
-is unavailable.)
-
-## Commit
-
-Do **not** auto-commit or push. Tell the user the handoff is written and they can
-commit via their normal flow — or run `ship`, which is the skill
-whose invocation *is* commit-and-push authorization. If they explicitly ask here,
-commit on the current branch with a short message — otherwise leave it.
-
-## What this skill does NOT do
-
-- No whole-repo audit, contradiction scan, or doc filing — that's `repo-align`. Even
-  `--full`'s reconcile is scoped to this session's changes.
-- Does not run tests, builds, linters, or validators — it only records validation
-  that already ran.
-- Does not edit `docs/prd.md` or `docs/design.md` without an explicit per-edit
-  "apply"; does not edit existing `decisions.md`/`ideas.md`/`lessons.md` entries —
-  those files are append-only.
-- Does not create `docs/status.md`, `docs/roadmap.md`, `docs/implementation-plan.md`,
-  loose root-level handoff/status/audit docs, or redundant scoped agent files.
-- No appending to the handoff (overwrite only); no auto-commit or push.
-
-## References
-
-- `../../templates/handoff.md` — the snapshot shape, incl. the Deferred section
-- `../../references/shelf-spec.md` — the shelf, entry formats, budgets, one-writer table
+Stop after this report.

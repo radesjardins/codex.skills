@@ -4,7 +4,7 @@ description: >
   This skill should be used when the user says "startup", "start session",
   "orient me", "where did we leave off", "catch me up", "what's the state",
   "session briefing", or "what was I working on". Fast, read-only session
-  orientation — read the L0/L1 docs + git state, run the two cheap mechanical
+  orientation: use the core profile to read L0/L1 plus direction and git state, run the two cheap mechanical
   scans, and surface a trust report (one line per managed doc, measured in
   commits-behind) plus the next task from the handoff. Recommends
   repo-init on a fresh repo, adopt on an
@@ -55,10 +55,13 @@ is not onboarding (`repo-init` / `adopt`) and not an audit (`repo-align`).
    - **Established but un-managed** — real code/history but no doc model →
      recommend `adopt` and stop.
    - **Managed repo** — orient (below).
-3. **Read L0/L1 + direction**: applicable `AGENTS.md` files, `docs/handoff.md`, and
+3. **Read L0/L1 + direction**: report the `.rad-repo.json` workflow profile, defaulting
+   to `core`. Read applicable `AGENTS.md` files, `docs/handoff.md`, and
    `docs/plan.md` if present, in one parallel batch. If the plan links an active
    initiative that owns the next task, read that one initiative. Read nothing else
-   by default.
+   by default. When the profile is `full` or the user asks for a full startup, also
+   read `docs/prd.md` and search decisions/lessons for entries tied to the current
+   task. Do not load unrelated history.
 4. **Build the trust report** from the doc-freshness JSON (`trust` block) — one line
    per managed doc that exists, measured in **commits-behind** (commits on HEAD since
    the doc's last modifying commit). Thresholds (from
@@ -78,6 +81,7 @@ is not onboarding (`repo-init` / `adopt`) and not an audit (`repo-align`).
 ```text
 Startup:
 Branch:           <current branch>
+Profile:          <core / full>
 Working tree:     <clean / dirty summary>
 Trust:
   handoff.md      <✅ N behind | ⚠️ N behind — quick wrapup? | ❌ N behind — align first>

@@ -31,6 +31,18 @@ routes overflow down the stack — an L0 rule
 that's really a lesson goes to `docs/lessons.md`, durable handoff content goes
 to `plan.md`, and so on).
 
+## Workflow profiles
+
+`core` is the default. It uses scoped instructions, one handoff, the executable
+contract, startup, wrapup, and ship. Deeper shelf files still remain valid and are
+read when the task needs them.
+
+`full` makes deeper document reconcile and alignment the normal default. A first
+`adopt` recommends one full pass, then routine work returns to core unless the owner
+sets `"profile": "full"` in `.rad-repo.json` or asks for full.
+
+Profiles change read depth. They do not create a second document model.
+
 ## The shelf
 
 A **closed** set of reference docs. No doc exists until its trigger fires; every doc
@@ -39,13 +51,13 @@ declares who updates it and when. Anything that isn't one of these kinds goes to
 
 | File | Holds | Created when | Updated when / by | Freshness check |
 |---|---|---|---|---|
-| `docs/decisions.md` | settled choices + one-line why — this **is** the decision-record system (no separate ADR directory; an ADR is just a written record of a decision and why) | first decision | anyone appends; never edited | append-only = never stale |
+| `docs/decisions.md` | settled choices + one-line why; existing ADR systems can remain linked satellites | first decision | anyone appends; never edited | append-only = never stale |
 | `docs/ideas.md` | ideas, pivots, cut features — the parking lot | first idea | anyone appends; `/rad-plan:replan` annotates rejections | consumed at `/rad-plan:replan` |
 | `docs/lessons.md` | mistakes worth remembering; doubles as a learning journal | first lesson | wrapup question appends | append-only |
 | `docs/design.md` | **sole source of the design system**: brand, UI tokens, layout/visual specs | UI work begins | when a visual/design decision is settled — recorded here, not in decisions.md | align cross-check |
 | `docs/architecture.md` | how the system hangs together (1 page + diagram) | repo gains >1 moving part | when a decisions.md entry touches structure; align nudges | align cross-check |
 | `docs/api.md` | endpoint inventory | repo exposes an API **now** (not "Later") | route change | **mechanical**: align diffs routes in code vs the doc |
-| `docs/handoff.md` | state + deferred ledger | repo-init | overwritten by wrapup/ship only | ≤3 commits behind in startup trust report |
+| `docs/handoff.md` | state + deferred ledger | repo-init | refreshed by wrapup/ship only | ≤3 commits behind in startup trust report |
 | `docs/prd.md` | goal + releases, owner's voice, plain language | `/rad-plan:plan` interview | owner, at replan boundaries | reviewed at replan |
 | `docs/plan.md` | milestones + tasks | `/rad-plan:plan` | planner only (`/plan`, `/replan`) | re-baselined per milestone |
 
@@ -107,9 +119,10 @@ and the fix or rule that prevents it.
 - 2026-06-12 · Coolify healthcheck path must match the app's route — a 404 healthcheck loops the deploy forever
 ```
 
-**handoff.md** — overwritten (never appended) by wrapup/ship, ≤60 lines: Last
-completed / Current focus / Next action / Validation / Watchouts, plus the deferred
-ledger, carried forward verbatim on every overwrite:
+**handoff.md** is a refreshed snapshot, never a session log. Its normal target is
+60 lines: Last completed / Current focus / Next action / Validation / Watchouts,
+plus the deferred ledger. Preserve facts required for a cold resume. Link long
+execution detail from an active initiative when one exists.
 
 ```
 ## Deferred — do not re-raise
@@ -221,6 +234,10 @@ Stamped into every repo's L0 so every harness inherits the same personality:
 3. **The pressure valve** — mid-session ideas and pivots append to `ideas.md` in
    seconds, block nothing, and get a fair hearing at the next `/rad-plan:replan`.
    Pivots are cheap *because* they're recorded.
+4. **Optional skill routing:** name a RAD Plan skill only when current evidence needs
+   that exact workflow and the skill appears in the current available-skill list.
+   When it is unavailable, report the planning need in plain language. Never invoke
+   it from a suggestion unless the owner asks for it or accepts the suggestion.
 
 Formula: **freedom to decide, obligation to record.**
 
@@ -274,15 +291,18 @@ or code and docs disagree without a settled decision, stop and surface the confl
 Applicable `AGENTS.md` files and optional `.rad-repo.json` define validation
 commands. Root instructions are defaults; closest-scope overlays add only materially
 different commands or constraints. `repo_contract.py` resolves this map for changed
-paths. `pre_ship.py` inspects staged Git blobs and blocks secrets, protected paths,
+paths. `pre_ship.py` inspects staged Git blobs and blocks high-confidence secret patterns, protected paths,
 unexpected generated output, oversized files, missing/failed validation, and
-unreviewed contract changes. Heuristic doc scans do not substitute for code checks.
+unreviewed contract changes. `repo-doctor.py` shows each command and source. Command
+approval is stored in local Git settings and expires when the command set changes.
+Heuristic doc scans do not substitute for code checks.
 
 ## Non-goals
 
 No status/roadmap/general implementation-plan/per-feature status docs. The controlled
 initiative exception above is only for an approved finite migration. No `docs/inbox/`
-staging tier. No separate ADR directory. No doc scaffolding "for later" — a shelf doc exists
+staging tier. RAD Repo does not create a second ADR system; an established ADR folder
+can remain as a linked satellite. No doc scaffolding "for later"; a shelf doc exists
 only after its trigger fires. No dashboards or per-session logs. No writing durable
 content without confirmation. Every required write stays under a minute or it won't
 survive contact with a real Tuesday.

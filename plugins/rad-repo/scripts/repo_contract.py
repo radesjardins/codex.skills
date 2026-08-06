@@ -4,15 +4,24 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
 CONFIG_NAME = ".rad-repo.json"
+DEFAULT_PROFILE = "core"
+PROFILE_NAMES = {"core", "full"}
+APPROVAL_KEY = "rad-repo.approvedValidationSha"
 COMMAND_LABELS = ("build", "test", "lint", "type-check", "typecheck", "validate", "check")
 COMMAND_RE = re.compile(
     rf"(?:{'|'.join(re.escape(label) for label in COMMAND_LABELS)})\s*:\s*`([^`]+)`",
+    re.IGNORECASE,
+)
+TABLE_COMMAND_RE = re.compile(
+    rf"^\s*\|\s*(?:{'|'.join(re.escape(label) for label in COMMAND_LABELS)})\s*\|\s*`?([^|`]+)`?\s*\|",
     re.IGNORECASE,
 )
 PLACEHOLDER_COMMANDS = {"<command>", "none", "n/a", "not configured", "not applicable"}
@@ -26,6 +35,7 @@ IGNORED_INSTRUCTION_DIRS = {
 class RepositoryContract:
     root: Path
     config: dict
+    config_path: Path
 
 
 def load_config(root: Path, config_path: Path | None = None) -> dict:
@@ -43,7 +53,12 @@ def load_config(root: Path, config_path: Path | None = None) -> dict:
 
 def load_contract(root: Path, config_path: Path | None = None) -> RepositoryContract:
     resolved = root.resolve()
-    return RepositoryContract(root=resolved, config=load_config(resolved, config_path))
+    resolved_config = (config_path or resolved / CONFIG_NAME).resolve(strict=False)
+    return RepositoryContract(
+        root=resolved,
+        config=load_config(resolved, resolved_config),
+        config_path=resolved_config,
+    )
 
 
 def all_instruction_files(root: Path) -> list[Path]:
@@ -84,11 +99,25 @@ def applicable_instruction_files(root: Path, target: str | Path) -> list[Path]:
 
 def commands_from_instruction(path: Path) -> list[str]:
     commands: list[str] = []
-    for match in COMMAND_RE.finditer(path.read_text(encoding="utf-8", errors="replace")):
-        command = match.group(1).strip()
+    text = path.read_text(encoding="utf-8", errors="replace")
+    candidates = [match.group(1) for match in COMMAND_RE.finditer(text)]
+    candidates.extend(
+        match.group(1)
+        for line in text.splitlines()
+        if (match := TABLE_COMMAND_RE.match(line))
+    )
+    for candidate in candidates:
+        command = candidate.strip()
         if command and command.lower() not in PLACEHOLDER_COMMANDS and command not in commands:
             commands.append(command)
     return commands
+
+
+def repository_profile(contract: RepositoryContract) -> str:
+    profile = contract.config.get("profile", DEFAULT_PROFILE)
+    if profile not in PROFILE_NAMES:
+        raise ValueError("profile must be 'core' or 'full'")
+    return profile
 
 
 def _matches_scope(path: str, scope: str) -> bool:
@@ -97,15 +126,24 @@ def _matches_scope(path: str, scope: str) -> bool:
     return normalized_path == normalized_scope or normalized_path.startswith(normalized_scope + "/")
 
 
-def validation_commands(contract: RepositoryContract, changed_paths: list[str]) -> list[str]:
-    commands: list[str] = []
+def validation_plan(contract: RepositoryContract, changed_paths: list[str]) -> dict:
+    command_entries: list[dict] = []
+    instruction_map: dict[str, list[str]] = {}
+
+    def add(command: str, source: str) -> None:
+        if command and not any(entry["command"] == command for entry in command_entries):
+            command_entries.append({"command": command, "source": source})
 
     targets = changed_paths or ["."]
     for target in targets:
-        for instruction in applicable_instruction_files(contract.root, target):
+        instructions = applicable_instruction_files(contract.root, target)
+        instruction_map[target] = [
+            instruction.relative_to(contract.root).as_posix()
+            for instruction in instructions
+        ]
+        for instruction in instructions:
             for command in commands_from_instruction(instruction):
-                if command not in commands:
-                    commands.append(command)
+                add(command, instruction.relative_to(contract.root).as_posix())
 
     validation = contract.config.get("validation", {})
     if not isinstance(validation, dict):
@@ -114,8 +152,7 @@ def validation_commands(contract: RepositoryContract, changed_paths: list[str]) 
     if not isinstance(root_commands, list) or not all(isinstance(item, str) for item in root_commands):
         raise ValueError("validation.commands must be a list of strings")
     for command in root_commands:
-        if command and command not in commands:
-            commands.append(command)
+        add(command, f"{contract.config_path.name}#validation.commands")
 
     scopes = validation.get("scopes", {})
     if not isinstance(scopes, dict):
@@ -125,9 +162,52 @@ def validation_commands(contract: RepositoryContract, changed_paths: list[str]) 
             raise ValueError(f"validation.scopes.{scope} must be a list of strings")
         if any(_matches_scope(path, scope) for path in changed_paths):
             for command in scoped_commands:
-                if command and command not in commands:
-                    commands.append(command)
-    return commands
+                add(command, f"{contract.config_path.name}#validation.scopes.{scope}")
+
+    allow_empty = validation.get("allow_empty", False)
+    if not isinstance(allow_empty, bool):
+        raise ValueError("validation.allow_empty must be a boolean")
+    return {
+        "profile": repository_profile(contract),
+        "instruction_map": instruction_map,
+        "commands": command_entries,
+        "allow_empty": allow_empty,
+    }
+
+
+def validation_commands(contract: RepositoryContract, changed_paths: list[str]) -> list[str]:
+    return [entry["command"] for entry in validation_plan(contract, changed_paths)["commands"]]
+
+
+def validation_fingerprint(plan: dict) -> str:
+    payload = {
+        "commands": plan["commands"],
+        "allow_empty": plan["allow_empty"],
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def approved_validation_fingerprint(root: Path) -> str | None:
+    result = subprocess.run(
+        ["git", "config", "--local", "--get", APPROVAL_KEY],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    value = result.stdout.strip()
+    return value or None
+
+
+def approve_validation_fingerprint(root: Path, fingerprint: str) -> None:
+    subprocess.run(
+        ["git", "config", "--local", APPROVAL_KEY, fingerprint],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
 
 
 def main() -> int:
@@ -141,16 +221,21 @@ def main() -> int:
     try:
         contract = load_contract(Path(args.root), args.config)
         paths = args.paths or ["."]
-        instruction_map = {
-            path: [
-                instruction.relative_to(contract.root).as_posix()
-                for instruction in applicable_instruction_files(contract.root, path)
-            ]
-            for path in paths
-        }
+        plan = validation_plan(contract, paths)
+        fingerprint = validation_fingerprint(plan)
+        approved = approved_validation_fingerprint(contract.root)
         report = {
-            "instruction_map": instruction_map,
-            "validation_commands": validation_commands(contract, paths),
+            "profile": plan["profile"],
+            "instruction_map": plan["instruction_map"],
+            "validation_commands": [entry["command"] for entry in plan["commands"]],
+            "command_sources": plan["commands"],
+            "allow_empty": plan["allow_empty"],
+            "validation_fingerprint": fingerprint,
+            "validation_trusted": (
+                not plan["commands"] and plan["allow_empty"]
+            ) or (
+                bool(plan["commands"]) and approved == fingerprint
+            ),
         }
     except ValueError as error:
         report = {"error": str(error)}
@@ -163,7 +248,7 @@ def main() -> int:
     if args.json:
         print(json.dumps(report, indent=2))
     else:
-        for path, instructions in instruction_map.items():
+        for path, instructions in report["instruction_map"].items():
             print(f"{path}: {', '.join(instructions) or '(no AGENTS.md)'}")
         for command in report["validation_commands"]:
             print(f"validate: {command}")

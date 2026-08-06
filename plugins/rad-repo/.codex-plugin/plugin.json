@@ -1,7 +1,7 @@
 {
   "name": "rad-repo",
-  "version": "3.0.0+codex.20260710025448",
-  "description": "Scoped repository context, executable validation contracts, safe shipping, active initiatives, handoffs, adoption, and drift alignment for Codex.",
+  "version": "3.1.0",
+  "description": "Small repository context, trusted validation contracts, handoffs, safe shipping, and on-demand code hotspot review for Codex.",
   "author": {
     "name": "RAD",
     "url": "https://github.com/radesjardins"
@@ -18,6 +18,8 @@
     "adopt",
     "repo-init",
     "repo-align",
+    "repo-doctor",
+    "complexity-audit",
     "doc-shelf",
     "context-stack",
     "trust-report",
@@ -32,8 +34,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "RAD Repo",
-    "shortDescription": "Manage scoped repo context, contracts, handoffs, and safe shipping.",
-    "longDescription": "RAD Repo provides startup orientation, scoped AGENTS.md discovery, executable validation contracts, reviewed pre-ship gates, quick wrapups, greenfield initialization, brownfield adoption, active migration initiatives, and deep documentation alignment.",
+    "shortDescription": "Manage repo context, trusted checks, handoffs, and shipping.",
+    "longDescription": "RAD Repo provides small startup context, scoped AGENTS.md discovery, locally approved validation contracts, reviewed pre-ship gates, clear wrapup closure, brownfield adoption, document alignment, and an on-demand code hotspot audit.",
     "developerName": "RAD",
     "category": "Productivity",
     "capabilities": [
@@ -43,6 +45,8 @@
     ],
     "defaultPrompt": [
       "Run repo startup and show the next task.",
+      "Run RAD Repo doctor and explain the validation contract.",
+      "Audit this repository for code maintenance hotspots.",
       "Set up this repo with the doc model.",
       "Align this repo's docs with the shelf."
     ]

@@ -5,7 +5,7 @@ description: >
   project", "new project setup", "scaffold the docs", "initialize the repo model",
   "get me started right", or when startup recommended it on a fresh repo. Builds the
   container for the doc model in a new or nearly empty repo: an AGENTS.md skeleton
-  with the stamped doc-model block, optional cross-agent shims, docs/ +
+  with the stamped doc-model block, docs/ +
   docs/archive/, and a handoff stub. Creates no shelf docs (their triggers haven't
   fired), runs no fit-out, never invents product content, and ends by recommending
   the planning workflow. For an existing repo with history and docs, use
@@ -38,11 +38,14 @@ lockfiles, `pyproject.toml`, `Cargo.toml`, framework config) — this only infor
 Confirm this is greenfield: no `AGENTS.md`, no real docs, little or no git history.
 If the repo is established, stop and recommend `adopt`.
 
-## 2. Agent scope
+## 2. Agent scope and profile
 
-Codex reads `AGENTS.md` natively. Do not create non-Codex shims from this skill;
-if the owner wants another agent's files, treat that as out of scope for the Codex
-plugin and ask before doing any separate setup.
+Codex reads `AGENTS.md` natively. RAD Repo creates only that agent instruction file.
+Another agent's files are outside this Codex plugin and require a separate request.
+
+The default RAD Repo profile is `core`. Do not create `.rad-repo.json` only to
+record that default. If the owner wants the full profile to persist, add
+`"profile": "full"` to the config after approval.
 
 ## 3. Scaffold — container only, only what's missing
 
@@ -60,8 +63,8 @@ without explicit confirmation.**
 Do **not** create any shelf doc — no `prd.md`, `plan.md`, `decisions.md`, `ideas.md`,
 `lessons.md`, `design.md`, `architecture.md`, or `api.md`. Their triggers haven't
 fired; planning births prd/plan, and the rest appear on first real content.
-Do **not** run fit-out here (no code yet means no traits to detect — that happens at
-the first `ship` or during `adopt`). Do not create `docs/status.md`,
+Do **not** run fit-out here. No code exists yet, so there are no traits to detect.
+Fit-out runs during `adopt` or from an explicit fit-out request. Do not create `docs/status.md`,
 `docs/roadmap.md`, `docs/inbox/`, or loose root-level status docs. Do not create a
 scoped `AGENTS.md` unless a subtree already has materially different commands,
 constraints, ownership, or generated-code rules; root defaults remain authoritative
@@ -100,5 +103,5 @@ Notes:
 
 ## References
 
-- `../../templates/` — AGENTS.md skeleton, doc-model block, shims, handoff stub, archive README
+- `../../templates/`: AGENTS.md skeleton, doc-model block, handoff stub, archive README
 - `../../references/shelf-spec.md` — the shelf, triggers, budgets, one-writer table

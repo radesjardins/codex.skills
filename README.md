@@ -21,7 +21,7 @@ codex plugin add rad-para@radesjardins-codex-skills
 | --- | --- |
 | [claude-to-codex-plugin-port](plugins/claude-to-codex-plugin-port/) | Port Claude Code plugins and skills to Codex packages. |
 | [rad-plan](plugins/rad-plan/) | Create, rescue, update, and review project plans. |
-| [rad-repo](plugins/rad-repo/) | Manage repository context, validation, handoffs, and shipping. |
+| [rad-repo](plugins/rad-repo/) | Manage repository context, trusted checks, handoffs, shipping, and code hotspots. |
 | [rad-para](plugins/rad-para/) | Organize, audit, and review a PARA second brain. |
 
 ## License

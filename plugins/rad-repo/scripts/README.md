@@ -8,18 +8,29 @@ reports remain evidence for human or agent judgment.
 ### `repo_contract.py`
 
 Discovers root and scoped `AGENTS.md` files, excludes dependency/build trees and
-out-of-repository symlinks, parses labeled validation commands, and merges optional
-global or path-scoped commands from `.rad-repo.json`.
+out-of-repository symlinks, parses labeled validation commands, records each command
+source, and merges optional global or path-scoped commands from `.rad-repo.json`.
 
 ```bash
-python repo_contract.py <project-dir> --changed-path src/app.py --json
+python repo_contract.py <project-dir> src/app.py --json
+```
+
+### `repo-doctor.py`
+
+Shows profile, path scopes, validation command sources, command fingerprint, local
+approval state, document-model version, and packaged resource state. `--approve`
+writes only the reviewed fingerprint to local Git settings. It never runs validation.
+
+```bash
+python repo-doctor.py <project-dir> --json
+python repo-doctor.py <project-dir> --approve --json
 ```
 
 ### `pre_ship.py`
 
 Inspects staged Git blobs rather than untrusted working-tree copies. It blocks
-protected paths, secret patterns, unexpected generated output, oversized files,
-unreviewed contract changes, failed validation commands, and missing validation
+protected paths, high-confidence secret patterns, unexpected generated output, oversized files,
+unreviewed contract changes, unapproved commands, failed validation commands, and missing validation
 declarations unless `validation.allow_empty` is explicitly true.
 
 ```bash
@@ -31,6 +42,16 @@ Exit `1` means shipping is blocked. Review contract changes before adding
 is never a general bypass.
 
 ## Context validators
+
+### `code-hotspots.py`
+
+Ranks tracked source files by recent Git changes and file size. It excludes common
+generated and dependency folders, reports raw evidence, and detects available
+quality tools without running or installing them.
+
+```bash
+python code-hotspots.py <project-dir> --months 12 --limit 10 --json
+```
 
 ### `repo-scan.py`
 
@@ -67,7 +88,8 @@ orphan terminology. It never edits content and exits `0` with advisory findings.
 
 ## Configuration
 
-Copy `../templates/repo.json` to `.rad-repo.json`. JSON is validated;
+Copy `../templates/repo.json` to `.rad-repo.json`. The workflow profile defaults to
+`core`. JSON is validated;
 invalid modes, scopes, lists, command objects, or shipping values fail closed in the
 contract and pre-ship tools.
 

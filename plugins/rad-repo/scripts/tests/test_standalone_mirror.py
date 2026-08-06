@@ -28,14 +28,17 @@ def shared_files(root: Path) -> dict[Path, str]:
     return files
 
 
-if STANDALONE_ROOT.exists():
-    plugin_files = shared_files(PLUGIN_ROOT)
-    standalone_files = shared_files(STANDALONE_ROOT)
-    assert standalone_files.keys() == plugin_files.keys(), (
-        f"standalone file set differs: plugin-only={sorted(plugin_files.keys() - standalone_files.keys())}, "
-        f"standalone-only={sorted(standalone_files.keys() - plugin_files.keys())}"
-    )
-    changed = [path for path in plugin_files if plugin_files[path] != standalone_files[path]]
-    assert not changed, f"standalone shared assets are stale: {changed}"
+if not STANDALONE_ROOT.exists():
+    print("SKIP: standalone mirror is not present in this repository")
+    raise SystemExit(0)
+
+plugin_files = shared_files(PLUGIN_ROOT)
+standalone_files = shared_files(STANDALONE_ROOT)
+assert standalone_files.keys() == plugin_files.keys(), (
+    f"standalone file set differs: plugin-only={sorted(plugin_files.keys() - standalone_files.keys())}, "
+    f"standalone-only={sorted(standalone_files.keys() - plugin_files.keys())}"
+)
+changed = [path for path in plugin_files if plugin_files[path] != standalone_files[path]]
+assert not changed, f"standalone shared assets are stale: {changed}"
 
 print("standalone mirror regression test passed")

@@ -80,6 +80,11 @@ for advisory prose hits. Ladder terms in the wrong doc still need routing. Conte
 problems get flagged to the planner replan skill, not fixed here (format is this
 plugin's lane; plan substance is the planner's).
 
+Name `rad-plan:replan` only when a structural plan problem exists and that exact
+skill appears in the current available-skill list. When it is unavailable, report
+the planning need without naming RAD Plan. Do not invoke it unless the owner asks
+or accepts the suggestion. Apply this rule to every planner handoff in this skill.
+
 ### 2c. api.md route-diff — only when `docs/api.md` exists
 
 Mechanical-first: grep the code for route definitions and diff against the doc.

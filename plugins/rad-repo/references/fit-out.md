@@ -1,8 +1,8 @@
 # Fit-out — equip the repo for what it actually is
 
-Run once, when code exists to read traits from: at the **first `/ship`** in a repo
-(no fit-out record in AGENTS.md yet) or during `/adopt`. Never at `repo-init` —
-traits don't exist until code does.
+Run during `/adopt` or when the owner explicitly asks for fit-out, after the repo has
+enough code to show its traits. Never run at `repo-init` or inside `/ship` because
+those workflows have a different job.
 
 ## Procedure
 
@@ -11,7 +11,7 @@ traits don't exist until code does.
 2. **Propose the matching equipment as one menu** — every detected trait with its
    install, plain language, one line each. The owner approves once (pick any subset).
 3. **Install only what was approved.** Record the outcome in AGENTS.md as one line
-   (e.g. `fit-out: 2026-07-02 — deploy-verify, api.md`) so fit-out never re-runs
+   (example: `fit-out: 2026-07-02, deploy-target, api.md`) so fit-out never re-runs
    uninvited.
 4. **Fit the executable contract.** Infer build, test, lint, type-check, and deploy
    commands from package scripts, CI, and existing instructions. Propose root defaults
@@ -22,7 +22,7 @@ traits don't exist until code does.
 
 | Trait detected | Evidence | Installs (on approval) |
 |---|---|---|
-| Coolify/Vercel deploy target | coolify config / vercel.json / owner says so | `deploy: <target>` line in AGENTS.md → activates deploy-verify in `/ship` |
+| Coolify/Vercel deploy target | coolify config / vercel.json / owner says so | `deploy: <target>` line in AGENTS.md enables one check for `/ship and verify deploy` |
 | API routes | route files/patterns in code | `docs/api.md` seeded from the actual routes → activates the route-diff in `repo-align` |
 | UI-heavy | substantial frontend tree (components/, pages/, styles) | visual-verify-before-done rule in AGENTS.md (render at desktop + 375 px before claiming done) |
 | TypeScript | tsconfig.json | a typecheck reminder rule in AGENTS.md |

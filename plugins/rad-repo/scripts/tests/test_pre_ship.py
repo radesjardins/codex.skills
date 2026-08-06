@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parents[1] / "pre_ship.py"
+DOCTOR = Path(__file__).resolve().parents[1] / "repo-doctor.py"
 
 
 def git(root, *args):
@@ -16,7 +17,7 @@ def git(root, *args):
     )
 
 
-def scan(files, config=None, extra_args=None, unstaged_files=None):
+def scan(files, config=None, extra_args=None, unstaged_files=None, approve=False):
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
         git(root, "init", "-q")
@@ -29,6 +30,12 @@ def scan(files, config=None, extra_args=None, unstaged_files=None):
         if config:
             (root / ".rad-repo.json").write_text(json.dumps(config), encoding="utf-8")
         git(root, "add", "-f", "--", ".")
+        if approve:
+            approval = subprocess.run(
+                [sys.executable, str(DOCTOR), str(root), "--approve", "--json"],
+                capture_output=True, text=True, check=False,
+            )
+            assert approval.returncode == 0, approval.stdout + approval.stderr
         for relative, content in (unstaged_files or {}).items():
             path = root / relative
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -51,7 +58,8 @@ code, report = scan({"dist/bundle.js": "generated\n"})
 assert code == 1, report
 assert report["findings"][0]["kind"] == "generated_output", report
 
-code, report = scan({"cert.txt": "-----BEGIN PRIVATE KEY-----\nsecret\n"})
+private_key_marker = "-----BEGIN " + "PRIVATE KEY-----\nsecret\n"
+code, report = scan({"cert.txt": private_key_marker})
 assert code == 1, report
 assert report["findings"][0]["kind"] == "secret_content", report
 
@@ -89,6 +97,22 @@ assert code == 0, report
 code, report = scan({"README.md": "docs only\n"}, extra_args=["--run-validation"])
 assert code == 1, report
 assert report["findings"][0]["kind"] == "validation_missing", report
+
+code, report = scan(
+    {"AGENTS.md": "# Instructions\n\n- Test: `echo safe`\n", "safe.txt": "safe\n"},
+    extra_args=["--allow-contract-change", "--run-validation"],
+)
+assert code == 1, report
+assert report["findings"][0]["kind"] == "validation_untrusted", report
+assert report["validation"] == [], "unapproved commands must never execute"
+
+code, report = scan(
+    {"AGENTS.md": "# Instructions\n\n- Test: `echo safe`\n", "safe.txt": "safe\n"},
+    extra_args=["--allow-contract-change", "--run-validation"],
+    approve=True,
+)
+assert code == 0, report
+assert report["validation"][0]["returncode"] == 0, report
 
 code, report = scan(
     {"README.md": "docs only\n"},

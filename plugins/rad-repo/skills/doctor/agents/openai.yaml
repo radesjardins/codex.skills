@@ -1,0 +1,4 @@
+interface:
+  display_name: "RAD Repo Doctor"
+  short_description: "Check repo commands, trust, and plugin resources"
+  default_prompt: "Use $doctor to explain this repository's validation contract and trust state."

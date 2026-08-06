@@ -4,11 +4,11 @@
 **Branch:** <branch>
 **Working tree:** <clean / dirty summary>
 
-<!-- A snapshot, not a log. Overwritten each /wrapup (or /ship) from git evidence.
-     Keep the whole file ≤60 lines. History lives in git and docs/archive/. Anything
+<!-- A snapshot, not a log. Refreshed by /wrapup or /ship from git evidence.
+     Target ≤60 lines while preserving facts needed to resume. History lives in git and docs/archive/. Anything
      that must stay true after the next session belongs in docs/plan.md, not here.
      The Deferred section is the one part carried forward verbatim on every
-     overwrite — prune an item only when its wake condition fires or the owner
+     refresh. Prune an item only when its wake condition fires or the owner
      closes it. -->
 
 ## Last completed

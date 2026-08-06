@@ -1,4 +1,5 @@
 {
+  "profile": "core",
   "vocabulary": {
     "mode": "advisory",
     "scope": "all"

@@ -13,7 +13,9 @@ from repo_contract import (
     all_instruction_files,
     applicable_instruction_files,
     load_contract,
+    repository_profile,
     validation_commands,
+    validation_plan,
 )
 
 
@@ -32,6 +34,7 @@ with tempfile.TemporaryDirectory() as temporary:
         """# Source overlay
 ## Stack & commands
 - Lint: `python lint.py`
+| Check | `python table_check.py` |
 """,
         encoding="utf-8",
     )
@@ -58,11 +61,35 @@ with tempfile.TemporaryDirectory() as temporary:
         "python -m compileall src",
         "python -m unittest",
         "python lint.py",
+        "python table_check.py",
         "python root_check.py",
         "python web_check.py",
     ], commands
     assert "python app.py" not in commands
     assert validation_commands(contract, [r"src\web\page.py"]) == commands
+    assert repository_profile(contract) == "core"
+    plan = validation_plan(contract, ["src/web/page.py"])
+    assert plan["commands"][0] == {
+        "command": "python -m compileall src",
+        "source": "AGENTS.md",
+    }, plan
+
+    (root / ".rad-repo.json").write_text(json.dumps({"profile": "wide"}), encoding="utf-8")
+    try:
+        repository_profile(load_contract(root))
+    except ValueError as error:
+        assert "core" in str(error) and "full" in str(error), error
+    else:
+        raise AssertionError("invalid profile must fail")
+    (root / ".rad-repo.json").write_text(
+        json.dumps({
+            "validation": {
+                "commands": ["python root_check.py"],
+                "scopes": {"src/web": ["python web_check.py"]},
+            }
+        }),
+        encoding="utf-8",
+    )
 
     (root / "docs").mkdir()
     (root / "docs" / "AGENTS.md").write_text(

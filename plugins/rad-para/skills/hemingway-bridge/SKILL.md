@@ -100,7 +100,7 @@ Recommend where to save the bridge note:
 ## Integration with rad-repo
 
 When the rad-repo plugin is installed and the work lives inside a git repo,
-`rad-repo:wrapup` owns the session handoff — it overwrites `docs/handoff.md`
+`rad-repo:wrapup` owns the session handoff. It refreshes `docs/handoff.md`
 from git evidence. The Hemingway Bridge is the PARA-notes variant: use it for PARA
 vault work (notes, captures, non-code projects) that git evidence can't see.
 

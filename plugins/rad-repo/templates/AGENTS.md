@@ -1,9 +1,11 @@
 # AGENTS.md — <PROJECT_NAME>
 
+<!-- rad-repo-doc-model: 1 -->
+
 <ONE_LINE_IDENTITY — what this repo is and its current status; agents read this line first.>
 
 Remote: <REMOTE_URL_OR_TBD>
-deploy: <none — set to e.g. `coolify` or `vercel` when a deploy target exists; /ship reads this>
+deploy: <none; set to e.g. `coolify` or `vercel` when a deploy target exists; /ship and verify deploy reads this>
 
 ## Stack & commands
 
@@ -18,7 +20,7 @@ deploy: <none — set to e.g. `coolify` or `vercel` when a deploy target exists;
   and `docs/archive/` for history. Nothing else gets written.
 - Units of work: Goal → Release (Now/Next/Later) → Milestone (M1…) → Task (T1…).
   Never phase, slice, sprint, epic, stage, or "step" as a tracked unit.
-- One writer per file: the planner writes prd.md/plan.md; wrapup/ship overwrite
+- One writer per file: the planner writes prd.md/plan.md; wrapup/ship refresh
   handoff.md; anyone appends to decisions/ideas/lessons (no one edits them);
   design.md is the sole source of the design system.
 - Full contract: rad-repo `references/shelf-spec.md`.

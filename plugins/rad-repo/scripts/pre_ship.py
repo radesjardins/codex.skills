@@ -10,7 +10,13 @@ import re
 import subprocess
 from pathlib import Path
 
-from repo_contract import all_instruction_files, load_contract, validation_commands
+from repo_contract import (
+    all_instruction_files,
+    approved_validation_fingerprint,
+    load_contract,
+    validation_fingerprint,
+    validation_plan,
+)
 
 DEFAULT_LARGE_FILE_BYTES = 5 * 1024 * 1024
 DEFAULT_GENERATED_DIRS = {".next", "build", "coverage", "dist", "node_modules", "target", "vendor"}
@@ -162,18 +168,27 @@ def main() -> int:
             })
         commands: list[str] = []
         validation: list[dict] = []
+        validation_contract: dict = {}
         if args.run_validation and not findings:
-            commands = validation_commands(contract, paths)
-            validation_config = contract.config.get("validation", {})
-            if not isinstance(validation_config, dict):
-                raise ValueError("validation must be an object")
-            allow_empty = validation_config.get("allow_empty", False)
-            if not isinstance(allow_empty, bool):
-                raise ValueError("validation.allow_empty must be a boolean")
-            if not commands and not allow_empty:
+            plan = validation_plan(contract, paths)
+            commands = [entry["command"] for entry in plan["commands"]]
+            fingerprint = validation_fingerprint(plan)
+            trusted = approved_validation_fingerprint(root) == fingerprint
+            validation_contract = {
+                "commands": plan["commands"],
+                "allow_empty": plan["allow_empty"],
+                "fingerprint": fingerprint,
+                "trusted": (not commands and plan["allow_empty"]) or trusted,
+            }
+            if not commands and not plan["allow_empty"]:
                 findings.append({
                     "kind": "validation_missing", "path": None,
-                    "message": "no validation commands were discovered; declare them or set validation.allow_empty",
+                    "message": "no validation commands were found; run repo-doctor.py for path-by-path details",
+                })
+            elif commands and not trusted:
+                findings.append({
+                    "kind": "validation_untrusted", "path": None,
+                    "message": "validation commands are not approved in this clone; review repo-doctor.py output and approve the exact command set",
                 })
             elif commands:
                 validation = run_validation(root, commands)
@@ -187,10 +202,11 @@ def main() -> int:
             "staged_paths": paths,
             "findings": findings,
             "validation": validation,
+            "validation_contract": validation_contract,
             "blocking": bool(findings),
         }
     except (OSError, subprocess.CalledProcessError, ValueError) as error:
-        report = {"staged_paths": [], "findings": [{"kind": "gate_error", "path": None, "message": str(error)}], "validation": [], "blocking": True}
+        report = {"staged_paths": [], "findings": [{"kind": "gate_error", "path": None, "message": str(error)}], "validation": [], "validation_contract": {}, "blocking": True}
 
     if args.json:
         print(json.dumps(report, indent=2))

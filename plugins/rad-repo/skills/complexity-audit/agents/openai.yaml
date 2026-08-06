@@ -1,0 +1,4 @@
+interface:
+  display_name: "Complexity Audit"
+  short_description: "Rank code maintenance hotspots from Git evidence"
+  default_prompt: "Use $complexity-audit to rank the code areas that need maintenance review."
