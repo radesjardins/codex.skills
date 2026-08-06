@@ -1,62 +1,76 @@
 # RAD Brainstorm
 
-RAD Brainstorm is a one-person, text-first thinking partner for Codex. It draws out your ideas before Codex adds its own, keeps idea generation separate from judgment, and ends with a choice and a cheap next test.
+RAD Brainstorm is a text-based thinking plugin for one person working with Codex. It helps the user frame a question, create or compare ideas, and choose a small way to test the leading option.
 
-The core rules are simple:
-
-- Your ideas come first.
-- Idea generation and evaluation stay separate.
-- One question is asked at a time.
-- Quick sessions stay quick.
-- Ideas are labeled as user, AI, or research contributions.
-- No code or project scaffolding happens during brainstorming.
-
-## Install
-
-```powershell
-codex plugin add rad-brainstorm@radesjardins-codex-skills
-```
+It is a good fit when normal chat feels too loose and a full product discovery process would be too much.
 
 ## Skills
 
-| Skill | Use it for |
-| --- | --- |
-| `rad-brainstorm:brainstorm-session` | A quick or full brainstorm on software, business, content, travel, creative work, or personal choices. |
-| `rad-brainstorm:idea-evaluation` | Compare ideas you already have with a clear evaluation method. |
-| `rad-brainstorm:five-whys` | Trace a repeated problem from its symptom to a root cause. |
-| `rad-brainstorm:software-design` | Turn a chosen software approach into a reviewable design spec. |
+| Skill | Use it for | Main result |
+| --- | --- | --- |
+| [rad-brainstorm:brainstorm-session](skills/brainstorm-session/SKILL.md) | A quick or full idea session for software, business, content, travel, creative work, or a personal choice | A recommendation, strong alternative, idea-source record, risky assumption, proof step, threshold, and stop signal |
+| [rad-brainstorm:idea-evaluation](skills/idea-evaluation/SKILL.md) | Comparing two or more ideas that already exist | A user-led ranking with trade-offs and a test for the leader |
+| [rad-brainstorm:five-whys](skills/five-whys/SKILL.md) | Framing the likely cause of a repeated problem | An evidence-labeled cause chain with uncertainty and untested branches |
+| [rad-brainstorm:software-design](skills/software-design/SKILL.md) | Turning one chosen software direction into a reviewable technical design | An approved design spec with scope, interfaces, data flow, recovery, and focused test needs |
 
-Technique modes for `brainstorm-session` include SCAMPER, Six Thinking Hats, reverse brainstorming, How Might We, starbursting, and creative unblocking.
+## How a brainstorm works
 
-## Quick and full sessions
+The normal flow is:
 
-Quick is the default for a small or bounded topic. It uses one technique, aims for three strong options and one recommendation, uses no subagents, and normally finishes within five user turns.
+1. Choose quick or full depth and a facilitator, partner, or generator role.
+2. Set the goal, affected person, success signal, and hard constraint.
+3. Ask for the user's starting ideas before Codex adds ideas in facilitator or partner mode.
+4. Label each idea as user, AI, or research.
+5. Use one familiar idea method, such as SCAMPER, How Might We, reverse brainstorming, or Six Thinking Hats.
+6. Group ideas by the way they work and check whether the set is truly varied.
+7. Move into a separate evaluation phase. The user scores first.
+8. End with a choice and a cheap proof that has a pass threshold and stop signal.
 
-Full is for an open, uncertain, or high-stakes topic. It can add current domain research, a challenge of the strongest ideas, and one optional checkpoint. Optional research or review work stays bounded.
+Quick mode uses one method, no subagents, and aims to finish within five user turns. Full mode can add consent-based research, one focused challenge, and one optional checkpoint.
 
-Before evaluation, larger idea sets are grouped by how each idea works. Original ideas and source labels stay visible until the user approves a merge.
+## What is specific about it
 
-## Output control
+Many brainstorming prompts use the same named methods. RAD Brainstorm's main difference is its control of AI timing and idea ownership.
 
-The user chooses whether the result stays in the conversation, goes to a personal folder, or becomes one dated file in the current project. Full sessions can save one approved checkpoint. Quick sessions create no file unless the user asks.
+The user contributes first when possible. Source labels keep the user's ideas visible. Generation and judgment have separate steps. Large idea sets keep their original IDs during grouping, and distinct ideas are not merged without approval.
 
-Each result names the recommendation, strongest alternative, riskiest assumption, cheapest proof, pass threshold, and stop signal. A Mermaid summary is optional when relationships are easier to understand as a visual.
+The close also goes past a ranked list. The leading choice must name its weakest assumption, a low-cost proof, an observable pass point, and a reason to stop.
 
-Project files are marked as transient when another workflow will consume them. RAD Brainstorm never writes to `docs/design.md` and never commits its output.
+## Research and review
 
-## Companion skills
+Current research is optional. The skill states the question and expected value, then asks before searching. Any research or challenge stays bounded and read-only. JSON schemas check the shape of those optional results.
 
-RAD Brainstorm works alone. It names an exact RAD Plan, RAD Repo, or RAD Council skill only when all of these conditions are true:
+Schema validation proves that required fields and basic value rules are present. It does not prove that the sources, reasoning, or recommendation are correct.
 
-1. The exact skill is installed and appears in the current available-skill list.
-2. Current evidence needs that workflow.
-3. Using it would add clear value.
+## Output and file rules
 
-It never invokes a suggested companion until the user asks or accepts.
+Results can stay in chat or go to one approved Markdown file. Quick sessions write no file unless asked. RAD Brainstorm does not commit files.
 
-## Scope
+A software spec can be saved to a dated project file. The plugin does not write to docs/design.md because that path may already hold visual or brand direction.
 
-RAD Brainstorm is built for one user working with Codex. It does not provide a shared canvas, live group voting, project tracking, implementation, or deployment monitoring.
+## Limits
+
+- This is a solo, text-first workflow. It has no shared canvas, live voting, workshop timer, or group facilitation service.
+- Named methods guide the conversation. They do not ensure original or useful ideas.
+- Five Whys produces a likely causal model. Evidence outside the conversation may still disprove it.
+- Idea scores depend on the chosen criteria and the information supplied.
+- Software design stops before implementation planning and coding.
+- The plugin does not track projects or monitor deployment.
+
+RAD Brainstorm works alone. It names a RAD Plan, RAD Repo, or RAD Council skill only when the exact skill is available, the current work needs it, and using it would add clear value. It waits for user acceptance before invoking a companion.
+
+## Install
+
+~~~powershell
+codex plugin add rad-brainstorm@radesjardins-codex-skills
+~~~
+
+Example requests:
+
+- "Run a quick brainstorm. Ask for my ideas before giving yours."
+- "Compare these four ideas and help me define the cheapest useful test."
+- "Use Five Whys, and mark which answers are evidence or assumptions."
+- "Turn this chosen software idea into a design spec. Do not implement it."
 
 ## License
 

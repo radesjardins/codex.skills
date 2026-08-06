@@ -1,63 +1,97 @@
-# rad-para — Codex workflows that actively manage your PARA second brain
+# RAD PARA
 
-Most PARA tools tell you about the methodology. rad-para implements it for you — organizing notes, running weekly reviews, distilling raw captures into usable knowledge, and maintaining continuity between sessions via the Hemingway Bridge pattern. Based on Tiago Forte's Building a Second Brain.
+RAD PARA helps one person set up, review, and use a PARA-based note system with Codex.
 
-## What's Included
+It is best suited to folders and Markdown notes that Codex can read. It can also give instructions for tools such as Notion, Obsidian, Apple Notes, or Google Drive, but this plugin does not connect to those services or change their data through an API.
 
-| Component | Name | Purpose |
-|-----------|------|---------|
-| Skill | **para-organize** | Core PARA setup, classification, diagnosis, review workflows |
-| Skill | **progressive-summarization** | Apply distillation layers (bold, highlight, executive summary) to raw notes |
-| Skill | **express-workflow** | Assemble Intermediate Packets into output via Archipelago of Ideas |
-| Skill | **hemingway-bridge** | PARA-aware session handoffs (integrates with rad-repo) |
-| Skill | **twelve-favorite-problems** | Interactive workshop to create a personal capture filter |
-| Skill | **weekly-review** | Scans PARA folders, finds stale projects, flags inbox overflow, generates a review briefing |
-| Skill | **audit** | Validates folder structure, detects anti-patterns, evaluates project health |
+## Method credit
 
-## Reference Files
+PARA, CODE, Progressive Summarization, Intermediate Packets, and related second-brain methods in this plugin come from the work of Tiago Forte and Forte Labs. The 12 Favorite Problems exercise is inspired by Richard Feynman.
 
-4 comprehensive reference files (1,200+ lines) under `skills/para-organize/references/`:
+This plugin packages guided Codex workflows around those methods. It does not claim ownership of the original methods.
 
-- `para_method.md` — PARA definitions, tool-specific setup guides (Notion, Obsidian, Apple Notes, Google Drive, plain files), PARA for teams
-- `code_framework.md` — CODE steps, capture criteria, 12 Favorite Problems, AI-enhanced workflows
-- `workflows.md` — Project kickoff/completion checklists, weekly/monthly reviews, digital detox
-- `creative_techniques.md` — Intermediate Packets, Archipelago of Ideas, Hemingway Bridge, Dial Down the Scope
+## Skills
 
-## Installation
+| Skill | Use it for | Main result |
+| --- | --- | --- |
+| [rad-para:para-organize](skills/para-organize/SKILL.md) | Setting up PARA, classifying notes, diagnosing a broken system, or planning a real folder reorganization | Advice, a classification, or an approved file-move plan |
+| [rad-para:audit](skills/audit/SKILL.md) | Checking an existing authorized PARA folder without changing it | A structural report with counts, dates, suspected issues, and suggested actions |
+| [rad-para:weekly-review](skills/weekly-review/SKILL.md) | Reviewing stale projects, inbox load, recent activity, and visible deadlines | A read-only weekly briefing |
+| [rad-para:progressive-summarization](skills/progressive-summarization/SKILL.md) | Distilling a note, article, transcript, or set of notes | Layered emphasis and a short summary shaped by the user's goal |
+| [rad-para:express-workflow](skills/express-workflow/SKILL.md) | Turning existing notes and research into an article, report, presentation, email, or other output | An outline, a draft, or a smaller first version |
+| [rad-para:hemingway-bridge](skills/hemingway-bridge/SKILL.md) | Preserving the state of a notes or creative project between sessions | A handoff note with status, first action, open questions, and related material |
+| [rad-para:twelve-favorite-problems](skills/twelve-favorite-problems/SKILL.md) | Creating or revising a personal capture filter | A user-owned list of open questions and a capture rule |
 
-```powershell
+## How it works
+
+The skills combine conversation with read-only folder inspection. The user supplies the PARA location or content, and Codex asks focused questions before giving a classification or report.
+
+The filesystem reorganization path has a stricter rule:
+
+1. Inspect the authorized root without changing it.
+2. Detect any current PARA structure.
+3. Read only enough content to classify unclear items.
+4. Show every folder to create and every file to move.
+5. Wait for explicit approval.
+6. Move approved items without deleting them, then write a PARA-Inventory.md file.
+
+The audit and weekly-review skills stay read-only.
+
+## Local folder scanner
+
+The plugin includes a narrow structural scanner:
+
+~~~powershell
+python .\scripts\audit-para-structure.py <para-root>
+python .\scripts\audit-para-structure.py <para-root> --strict --json
+~~~
+
+It checks the four top-level folders, root-level orphan files, project names that look like topics, optional outcome markers, and project-count notices.
+
+The script does less than the conversational audit skill. It does not inspect full note meaning, staleness, deadlines, archive health, or cross-platform copies.
+
+## What is specific about it
+
+Many PARA guides explain where Projects, Areas, Resources, and Archive fit. Other note tools focus on search, links, or capture.
+
+RAD PARA's specific contribution is the range of guided work in one small package:
+
+- safe setup and classification;
+- a read-only structural audit and weekly review;
+- layered note distillation;
+- assembly of existing notes into an output;
+- a notes-focused session handoff;
+- a personal question list used as a capture filter.
+
+The real-file workflow also requires one complete move plan before any reorganization. That gives the user a review point when folder names alone do not tell the full story.
+
+## Limits
+
+- Folder names, file dates, and keyword scans are incomplete evidence. A stale timestamp may describe a finished or intentionally quiet project.
+- Project-count and staleness thresholds are working rules used by the skills. They are prompts for review, not measured health standards.
+- The audit can misclassify a topic, responsibility, or project when the available context is thin.
+- Progressive Summarization changes emphasis. It can omit a point the user considers important.
+- Express can draft from supplied notes, but it cannot verify claims that lack sources.
+- The plugin has no sync engine, scheduler, reminders, search index, live Notion connection, or Obsidian extension.
+- Cross-platform consistency can be checked only when the user gives access to each copy.
+- The user remains responsible for backups and final file placement.
+
+When RAD Repo is installed, the Hemingway Bridge skill can place PARA context into a repository handoff. RAD Repo owns the Git-based handoff when both workflows apply.
+
+## Install
+
+~~~powershell
 codex plugin add rad-para@radesjardins-codex-skills
-```
+~~~
 
-## Usage Examples
+Example requests:
 
-```
-# Set up PARA from scratch
-"Help me set up a Second Brain"
-
-# Distill a raw article
-"Apply progressive summarization to this article"
-
-# Run weekly review
-"Run my weekly review"
-
-# Audit folder structure
-"Audit my PARA system"
-
-# Create capture filter
-"Help me identify my 12 favorite problems"
-
-# Assemble notes into output
-"I have research notes — help me write an article"
-
-# Session handoff
-"Write a hemingway bridge for what I was working on"
-```
-
-## Optional Integration
-
-- **rad-repo**: The hemingway-bridge skill integrates with rad-repo's `/wrapup` and `/startup` cycle for seamless session handoffs.
+- "Help me classify these notes. Explain each uncertain choice."
+- "Audit this PARA folder. Keep the scan read-only."
+- "Show me the full file-move plan and wait for approval."
+- "Apply Progressive Summarization to these notes for my current project."
+- "Use my saved notes to build a short report outline."
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).

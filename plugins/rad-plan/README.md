@@ -1,129 +1,105 @@
-# rad-plan
+# RAD Plan
 
-RAD Plan creates, rescues, updates, and audits implementation plans for Codex. It is built for solo developers who want one clear plan without adopting a full spec system.
+RAD Plan creates and maintains implementation plans for Codex. It is for a solo builder or small team that wants one checked plan without adding a task database or a large set of spec files.
 
-It writes planning artifacts. It never implements application code.
-
-## What it adds
-
-- An evidence-first interview that confirms repository facts before asking questions.
-- Eight discovery areas for full planning, with no more than three rounds.
-- A quick path with one batch of no more than five questions.
-- A Now, Next, and Later release map. Only Now receives task detail.
-- A bounded read of the real implementation surface before task paths are named.
-- One plan contract for a human owner and a fresh coding agent.
-- Outcome-to-task coverage with final proof.
-- Risk-first milestones and safe recovery rules.
-- Mechanical lint plus one adversarial risk pass.
-- Separate rescue, replan, and review workflows.
+The plugin writes planning documents. It does not implement application code.
 
 ## Skills
 
-| Skill | Use it for | Result |
-|---|---|---|
-| `rad-plan:plan` | A new project, feature, or clear next effort | An approved current plan |
-| `rad-plan:rescue` | An abandoned, unclear, or poorly documented project | Evidence-led intent recovery and a new plan |
-| `rad-plan:replan` | Shipped work, changed scope, obsolete tasks, or a new release | A plan reconciled with Git evidence |
-| `rad-plan:review-plan` | An audit before execution | Mechanical findings and one risk verdict |
+| Skill | Use it for | Main result |
+| --- | --- | --- |
+| [rad-plan:plan](skills/plan/SKILL.md) | A new project, feature, or clear next effort | An owner-approved implementation plan |
+| [rad-plan:rescue](skills/rescue/SKILL.md) | A project with unclear status, stale documents, abandoned work, or uncertain intent | An evidence-labeled state report and a new plan based on what exists |
+| [rad-plan:replan](skills/replan/SKILL.md) | A plan made inaccurate by shipped work, changed scope, or new evidence | A plan reconciled with Git and repository evidence |
+| [rad-plan:review-plan](skills/review-plan/SKILL.md) | A readiness and risk check on an existing plan | A mechanical report, a risk verdict, and proposed edits |
 
-## Quick and full planning
+## How planning works
 
-The owner chooses the depth.
+RAD Plan reads repository evidence before it asks the owner to repeat facts. For an existing project, it checks authority documents, the current plan, top-level configuration, recent design files, and a bounded part of the likely code surface.
 
-**Quick** is for one known change in one system with no new service, deployment target, auth, payment, personal-data, or schema risk.
+The owner chooses quick or full depth.
 
-- One evidence pass
-- One question batch, with five questions maximum
-- One mirror and assumption check
-- No PRD draft unless requested
-- One risk pass
-- `plan.md` only by default
+Quick mode is for one known change in one system without a new service, deployment target, authentication, payment, personal-data, or schema risk. It uses one evidence pass and one batch of up to five questions.
 
-**Full** is for new products, unclear architecture, cross-system work, migrations, auth, payments, personal data, or a new deployment target.
+Full mode is for new products, unclear architecture, work across systems, migrations, authentication, payments, personal data, or a new deployment target. It uses up to three interview rounds and can add bounded stack and risk reviews.
 
-- Up to three discovery rounds
-- Optional stack review when a real choice exists
-- One first risk pass
-- Another pass only after REVISE and a plan change, with three passes maximum
+Both modes create a Now, Next, and Later release map. Only Now receives detailed tasks.
 
-## Plan contract
+## The plan contract
 
-The current plan normally lives at `docs/plan.md` and uses this model:
-
-- Goal: one product end state in the PRD.
-- Release: Now, Next, or Later.
-- Milestone: a shippable part of Now.
-- Task: one bounded work item.
-
-Each task has six fields:
+The default current plan is docs/plan.md. Every live task has six fields:
 
 - Objective
-- Files, with `[existing]` or `[new]` labels
+- Files, marked existing or new
 - Depends on
 - Done when
 - Validate
 - Rollback
 
-The plan also maps every current outcome to live tasks and final proof. A live plan above 20 tasks gets a split warning.
+The plan maps each current outcome to live tasks and final proof. It warns when the current release grows past 20 live tasks.
 
-See [Plan Contract 7.1](references/plan-template.md).
+The mechanical linter checks required sections, task fields, duplicate IDs, dependency errors and cycles, outcome links, file labels, vague proof phrases, task count, and unsafe rollback command forms.
 
-## Safe recovery
+The risk review is separate. It looks for product, architecture, sequencing, validation, and recovery problems that a rule-based linter cannot decide.
 
-Rollback describes how to restore code, data, configuration, deployment, or external state. Generated plans do not use destructive Git or recursive-delete commands as rollback steps. When no safe automatic path exists, the plan says that owner-led recovery is required.
+## What is specific about it
 
-## Planning documents
+RAD Plan shares familiar parts with chat planning, spec templates, and task breakdown tools.
 
-RAD Plan keeps the write surface small:
+Its specific combination is:
 
-- It writes the current plan.
-- It can create a missing PRD from confirmed interview answers and section approval.
-- It can append confirmed entries to decisions or ideas files that already exist.
-- It records other confirmed document changes inside `## Durable follow-ups` in the plan.
-- It does not create architecture, API, decisions, ideas, status, roadmap, timeline, or temporary update-prompt files.
+- repository evidence before the interview;
+- quick and full depth with stated limits;
+- one maintained plan with coarse future work;
+- outcome-to-task coverage;
+- a six-field task contract with recovery;
+- separate rescue and replan paths for existing projects;
+- deterministic lint followed by one bounded judgment review.
 
-## Companion plugins
+This keeps the workflow smaller than systems that add a task database, execution engine, model router, or multi-repository coordinator.
 
-RAD Plan can work alone.
+## Write boundary
 
-It names a RAD Repo or RAD Brainstorm skill only when the exact skill is installed and appears in the current available-skill list, current evidence needs that workflow, and using it would add clear value. It never invokes a suggested companion until the owner asks or accepts.
+RAD Plan can write the current plan. It can create a missing or skeletal PRD only from confirmed answers and only after section approval.
 
-The public brainstorming companion will use the `rad-brainstorm:*` namespace.
+It may append an approved decision or idea when the matching file already exists. Other confirmed document work stays in a Durable follow-ups section in the plan.
 
-## Stack decisions
+The plugin does not create architecture, API, status, timeline, or temporary update-prompt files.
 
-RAD Plan keeps the current stack when it can meet the requirement. When a real choice exists, the stack advisor checks existing fit, user constraints, current documentation, test support, deployment, maintenance, compatibility, security, license, cost, and operating burden.
+## Limits
 
-There is no fixed language or framework default. See the [Stack Decision Scorecard](references/golden-path-matrix.md).
+- The linter checks document structure and selected wording. It cannot prove that an architecture will work.
+- The risk review is model judgment. The owner still decides whether a risk is real and what trade-off to accept.
+- File inspection is bounded. Uncertain paths become discovery work instead of invented paths.
+- Rescue does not run or repair the application. Unknown runtime behavior stays unknown or becomes a plan task.
+- Replan treats work as shipped only when repository evidence supports it.
+- The plugin is best used for one repository and one bounded current release.
+- Plan approval does not authorize implementation.
 
-## Mechanical checks
+RAD Plan can work alone. It names a RAD Repo or RAD Brainstorm skill only when the exact skill is available, the evidence needs it, and it would add clear value. It waits for owner acceptance before invoking a companion.
 
-`scripts/plan-lint.py` checks:
+## Install
 
-- required sections;
-- the six task fields;
-- duplicate sections and task IDs;
-- missing, self, contradictory, and cyclic dependencies;
-- Outcome coverage links and final proof;
-- 7.1 file labels;
-- vague Done when, Validate, and outcome proof phrases;
-- more than 20 live tasks;
-- unsafe rollback command forms.
+~~~powershell
+codex plugin add rad-plan@radesjardins-codex-skills
+~~~
 
-`scripts/validate-json.py` checks stack-advisor and risk-assessor output against their JSON schemas.
+Example requests:
 
-Both scripts use Python 3.8 or later and require no package. The optional `jsonschema` package gives fuller draft-07 support.
+- "Create a quick implementation plan for this known change."
+- "Rescue this project. Use repository evidence and do not run the app."
+- "Replan docs/plan.md from the work that has shipped."
+- "Review this plan for outcome coverage, dependency errors, and unsafe recovery."
 
-## Fit
+## Scripts
 
-RAD Plan is a good fit for one person or a small team working in one repository. A current release should stay below 20 live tasks when practical.
+The plugin includes:
 
-Larger programs can still use it by planning one bounded release at a time. RAD Plan does not add a task database, execution engine, model router, MCP server, background process, or multi-repository coordinator.
+- scripts/plan-lint.py for the plan contract;
+- scripts/validate-json.py for optional stack and risk review output.
 
-## Relationship to Codex Plan mode
-
-Codex Plan mode can structure a planning conversation. RAD Plan adds the evidence protocol, quick/full depth, release map, durable plan contract, outcome coverage, rescue, replan, and mechanical checks.
+Both work without a required third-party package. See [scripts/README.md](scripts/README.md) for commands and exit codes.
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).

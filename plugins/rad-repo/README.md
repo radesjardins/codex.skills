@@ -1,106 +1,101 @@
-# rad-repo
+# RAD Repo
 
-Repository context, contract, and lifecycle management for Codex. The plugin keeps
-agent-facing documentation authoritative, discovers scoped instructions, validates
-finite initiatives, and gates shipping on reviewed changes and repository-declared
-checks.
+RAD Repo helps Codex keep a repository understandable between sessions. It uses a small document model, an evidence-based handoff, repository-declared checks, and a guarded Git shipping flow.
 
-The default `core` profile uses one instruction contract, one current handoff, and
-Git-based ship checks. The `full` profile adds deeper document reconcile and
-alignment. A first `adopt` recommends one full pass, then routine work returns to
-core.
-
-## Context stack
-
-| Level | Source | Purpose |
-|---|---|---|
-| L0 | root and scoped `AGENTS.md` | Repository defaults plus non-duplicative subtree overlays |
-| L1 | `docs/handoff.md` | Current state, next action, validation evidence, watchouts |
-| L2 | `docs/decisions.md`, `docs/lessons.md` | Durable constraints and proven lessons |
-| L3 | `docs/prd.md`, `docs/plan.md`, `docs/design.md`, `docs/initiatives/*.md` | Intent, approved change, and finite migration packets |
-| L4 | `docs/archive/` | Historical context, read only when deliberately retrieved |
-
-The canonical contract is `references/shelf-spec.md`. Authority is domain-specific:
-instructions and ADRs govern constraints, the PRD governs product intent,
-architecture/API/code describe current state, the plan and active initiatives govern
-approved future work, and handoff records session state.
+It is for one person or a small team that works with coding agents over many sessions. It can also bring an older repository into the model without erasing useful local documents.
 
 ## Skills
 
-| Skill | Purpose |
-|---|---|
-| `startup` | Read-only orientation, instruction map, trust report, mechanical scans |
-| `wrapup` | Refresh handoff with Git evidence and validation results |
-| `ship` | Review and stage intended paths, run the pre-ship gate, commit, and push |
-| `doctor` | Explain command sources, local trust, path scopes, and plugin resources |
-| `complexity-audit` | Rank code maintenance hotspots from Git evidence, on request |
-| `repo-init` | Create the minimal greenfield context container |
-| `adopt` | Archaeology-first brownfield onboarding without code edits |
-| `repo-align` | Deep context, instruction, initiative, vocabulary, and drift correction |
+| Skill | Use it for | Main result |
+| --- | --- | --- |
+| [rad-repo:startup](skills/startup/SKILL.md) | Starting a work session in a managed repository | A read-only briefing with Git state, document trust, current focus, and one next task |
+| [rad-repo:wrapup](skills/wrapup/SKILL.md) | Stopping work without losing the exact resume point | An updated docs/handoff.md and a closure report |
+| [rad-repo:ship](skills/ship/SKILL.md) | Reviewing, checking, committing, and pushing the intended work | A pushed commit or a clear blocked result |
+| [rad-repo:doctor](skills/doctor/SKILL.md) | Explaining missing or untrusted repository validation | A read-only report of command sources, path scopes, approval state, and plugin resources |
+| [rad-repo:complexity-audit](skills/complexity-audit/SKILL.md) | Finding code areas that deserve maintenance review | Five to ten ranked hotspots with evidence, risk, and test needs |
+| [rad-repo:repo-init](skills/repo-init/SKILL.md) | Adding the minimum document container to a new repository | AGENTS.md, docs/handoff.md, and docs/archive without invented product content |
+| [rad-repo:adopt](skills/adopt/SKILL.md) | Bringing an established repository onto the model | An evidence-led document map, approved moves, verified commands, and a new handoff |
+| [rad-repo:repo-align](skills/repo-align/SKILL.md) | Running a deeper, opt-in document and instruction cleanup | Mechanical findings plus owner-approved routing, archive, or wording changes |
 
-## Repository contract
+## The context model
 
-Validation commands come from labeled commands in applicable `AGENTS.md` files and
-optional `.rad-repo.json` entries. Root instructions are defaults;
-the closest scoped `AGENTS.md` adds commands and constraints for changed paths.
+RAD Repo gives each kind of information a preferred home:
 
-Run `scripts/repo-doctor.py` to see each command and source. The owner approves the
-exact command set once per clone. Approval stays in local Git settings and expires
-when a command changes.
+| Level | Main source | Purpose |
+| --- | --- | --- |
+| L0 | Root and scoped AGENTS.md files | Commands, constraints, and path-specific agent rules |
+| L1 | docs/handoff.md | Current state, validation evidence, next action, and watchouts |
+| L2 | docs/decisions.md and docs/lessons.md | Settled choices and proven lessons |
+| L3 | PRD, plan, design, architecture, API, and active initiative files | Product intent, approved future work, and current system facts |
+| L4 | docs/archive | Deliberately retrieved history |
 
-Start from `templates/repo.json` when configuration is useful. It supports:
+The root instructions provide defaults. A closer AGENTS.md can add rules for its subtree. RAD Repo tries to keep startup context small, then reads deeper documents only when the task or selected profile needs them.
 
-- vocabulary modes `advisory`, `strict`, and `off`, with `all` or `headings` scope;
-- workflow profiles `core` and `full`;
-- global and path-scoped validation commands;
-- an explicit empty-validation exception for repositories with nothing executable;
-- protected paths, generated-directory rules, and a staged-file size limit.
+The core profile is the routine default. The full profile adds deeper document review. A first adoption recommends one full pass so the existing document set can be mapped.
 
-`ship` never uses `git add -A`. It stages reviewed paths and runs:
+## Repository checks and local trust
 
-```bash
-python scripts/pre_ship.py . --run-validation --json
-```
+Validation commands come from labeled commands in the applicable AGENTS.md files and optional .rad-repo.json entries.
 
-The gate blocks high-confidence secret patterns, protected paths, unexpected generated output, large files,
-failed checks, and missing validation declarations. Contract changes require staged
-diff review plus `--allow-contract-change`; unstaged contract edits always block.
+RAD Repo doctor shows the exact commands and their sources. The owner approves the command fingerprint once per clone. Approval is stored in local Git settings and expires when a command changes.
 
-Normal `ship` stops after push. `ship and verify deploy` adds one read-only deploy
-check. It never starts a polling loop.
+The pre-ship gate checks staged Git content for:
 
-Normal `wrapup` records closure and does not commit. `wrapup and commit` creates one
-local documentation commit. `wrapup and ship` uses the full ship workflow.
+- high-confidence secret patterns;
+- protected paths;
+- unexpected generated output;
+- configured file-size limits;
+- unreviewed contract changes;
+- missing or unapproved validation commands;
+- failed validation commands.
 
-## Active initiatives
+Ship stages reviewed paths. It does not use git add -A. A normal ship stops after push. A request to ship and verify deploy adds one read-only deploy check and no polling loop.
 
-Use `docs/initiatives/<slug>.md` only for an approved, finite migration too detailed
-for `docs/plan.md`. Copy `templates/initiative.md`; every initiative must name its
-owner, status, baseline, linked plan, retirement condition, archive target,
-acceptance criteria, and rollback strategy. Archive it when its retirement trigger
-fires.
+## What is specific about it
 
-## Scripts and tests
+Many repository tools use instruction files, handoff notes, documentation checks, or pre-commit gates. RAD Repo uses the same basic parts.
 
-Scripts use only the Python standard library and Git CLI. See `scripts/README.md` for
-their exact enforcement boundaries.
+Its main difference is the authority and trust model. Each fact has an expected document owner. The current handoff stays short. Commands are discovered by path and approved locally before a shipping workflow runs them.
 
-```bash
-python scripts/tests/run_all.py
-```
+RAD Repo also keeps code-hotspot review separate from routine work. The complexity audit uses Git churn and file size to choose a few files for human or agent review. It does not add a universal code score or a complexity gate to every session.
 
-The regression suite covers mechanical scanning, scoped contracts, staged-change
-safety, vocabulary profiles, Git-aware freshness, locked-constraint conflicts,
-redundancy heuristics, Unicode paths, symlink boundaries, missing history, and the
-user-owned instruction audit.
+## Write and Git boundaries
 
-## Interaction contract
+- Startup, doctor, and complexity-audit are read-only.
+- Wrapup updates the handoff. Normal wrapup does not commit. Wrapup and commit creates one local documentation commit.
+- Adopt and repo-align show document moves and judgment-based edits before applying them.
+- Ship authorizes a normal commit and push for the reviewed work. It does not authorize force-push, merge, deployment, deletion, or branch switching.
+- User-owned instruction text is preserved unless the owner approves a specific rewrite.
 
-- Ask before destructive actions, contract changes, or unresolved structural edits.
-- Preserve user-owned instruction content unless explicitly authorized to rewrite it.
-- Challenge once with evidence, then commit to the owner's decision.
-- Suggest a RAD Plan skill only when it is currently available and evidence shows a
-  planning need. Invoke it only after the owner asks or accepts the suggestion.
-- Do not present heuristic findings as semantic proof.
-- Never commit secrets, force-push, or push/deploy unless the invoked workflow grants
-  that authorization.
+## Limits
+
+- The document model is opinionated. A repository with an effective local model may need mapping and links instead of renaming.
+- Freshness, contradiction, redundancy, vocabulary, and hotspot reports use mechanical or lexical rules. Review every finding before changing an authority document.
+- The complexity audit ranks review value from churn, size, nearby tests, and existing quality signals. It does not measure semantic complexity across every language.
+- Clone-local command approval does not make an unsafe command safe. The owner must inspect the command first.
+- The pre-ship gate checks the staged state and declared validations. It cannot prove production health.
+- RAD Repo does not add a task database, code index, vector store, background service, or generated wiki.
+
+RAD Repo names a RAD Plan skill only when that exact skill is available and repository evidence shows a planning need. It waits for the owner before invoking it.
+
+## Install
+
+~~~powershell
+codex plugin add rad-repo@radesjardins-codex-skills
+~~~
+
+Example requests:
+
+- "Run RAD Repo startup and show the next task."
+- "Run RAD Repo doctor. Explain every validation command before asking me to trust it."
+- "Audit code complexity. Keep it read-only and rank only the top five files."
+- "Adopt this existing repository. Show every document move before making it."
+- "Ship the reviewed changes."
+
+## Scripts
+
+The plugin includes standard-library Python tools for contract discovery, command trust, staged checks, document signals, vocabulary, and code hotspots. See [scripts/README.md](scripts/README.md) for the exact checks and exit behavior.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
