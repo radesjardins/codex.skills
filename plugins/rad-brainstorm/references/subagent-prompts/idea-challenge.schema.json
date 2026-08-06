@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "rad-brainstorm/idea-challenge.schema.json",
+  "title": "RAD Brainstorm idea challenge contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["challenge_complete", "ideas", "cross_idea_notes"],
+  "properties": {
+    "challenge_complete": { "type": "boolean", "const": true },
+    "ideas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "description",
+          "assessment",
+          "confidence",
+          "riskiest_assumptions",
+          "pre_mortem",
+          "blind_spots",
+          "strengths",
+          "recommendations"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "assessment": {
+            "enum": ["strong", "promising_with_gaps", "needs_significant_rework", "fundamentally_flawed"]
+          },
+          "confidence": { "enum": ["high", "medium", "low"] },
+          "riskiest_assumptions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["assumption", "category", "evidence_level", "matters_because"],
+              "properties": {
+                "assumption": { "type": "string" },
+                "category": { "enum": ["desirability", "feasibility", "viability", "adaptability"] },
+                "evidence_level": { "enum": ["strong", "some", "untested", "contradicted"] },
+                "matters_because": { "type": "string" }
+              }
+            }
+          },
+          "pre_mortem": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["scenario", "likelihood", "preventable", "mitigation"],
+              "properties": {
+                "scenario": { "type": "string" },
+                "likelihood": { "enum": ["H", "M", "L"] },
+                "preventable": { "enum": ["Y", "P", "N"] },
+                "mitigation": { "type": ["string", "null"] }
+              }
+            }
+          },
+          "blind_spots": { "type": "array", "items": { "type": "string" } },
+          "strengths": { "type": "array", "items": { "type": "string" } },
+          "recommendations": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "cross_idea_notes": { "type": "string" }
+  }
+}

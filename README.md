@@ -13,6 +13,7 @@ codex plugin marketplace add radesjardins/codex.skills
 ```powershell
 codex plugin add claude-to-codex-plugin-port@radesjardins-codex-skills
 codex plugin add rad-plan@radesjardins-codex-skills
+codex plugin add rad-brainstorm@radesjardins-codex-skills
 codex plugin add rad-repo@radesjardins-codex-skills
 codex plugin add rad-para@radesjardins-codex-skills
 ```
@@ -21,6 +22,7 @@ codex plugin add rad-para@radesjardins-codex-skills
 | --- | --- |
 | [claude-to-codex-plugin-port](plugins/claude-to-codex-plugin-port/) | Port Claude Code plugins and skills to Codex packages. |
 | [rad-plan](plugins/rad-plan/) | Create, rescue, update, and audit one executable project plan. |
+| [rad-brainstorm](plugins/rad-brainstorm/) | Facilitate anti-anchoring brainstorms, evaluate ideas, trace root causes, and create design specs. |
 | [rad-repo](plugins/rad-repo/) | Manage repository context, trusted checks, handoffs, shipping, and code hotspots. |
 | [rad-para](plugins/rad-para/) | Organize, audit, and review a PARA second brain. |
 

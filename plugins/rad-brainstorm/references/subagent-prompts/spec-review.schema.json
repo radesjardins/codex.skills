@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "rad-brainstorm/spec-review.schema.json",
+  "title": "RAD Brainstorm spec review contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "review_complete",
+    "iteration",
+    "status",
+    "blocking_issues",
+    "advisory_recommendations",
+    "assessment",
+    "escalation_required",
+    "unresolved_issues"
+  ],
+  "properties": {
+    "review_complete": { "type": "boolean", "const": true },
+    "iteration": { "type": "integer" },
+    "status": { "enum": ["approved", "issues_found"] },
+    "blocking_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["section", "category", "issue", "why_it_matters"],
+        "properties": {
+          "section": { "type": "string" },
+          "category": {
+            "enum": ["completeness", "coverage", "consistency", "clarity", "yagni", "scope", "architecture", "traceability"]
+          },
+          "issue": { "type": "string" },
+          "why_it_matters": { "type": "string" }
+        }
+      }
+    },
+    "advisory_recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["section", "suggestion"],
+        "properties": {
+          "section": { "type": "string" },
+          "suggestion": { "type": "string" }
+        }
+      }
+    },
+    "assessment": { "type": "string" },
+    "escalation_required": { "type": "boolean" },
+    "unresolved_issues": { "type": "array", "items": { "type": "string" } }
+  }
+}

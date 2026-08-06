@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "rad-brainstorm/domain-research.schema.json",
+  "title": "RAD Brainstorm domain research contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "research_complete",
+    "topic",
+    "answer",
+    "common_approaches",
+    "key_constraints",
+    "pain_points",
+    "recent_developments",
+    "failed_approaches",
+    "opportunity_signals",
+    "transferable_patterns",
+    "contested_or_uncertain",
+    "surprises",
+    "sources",
+    "confidence",
+    "searches_used"
+  ],
+  "properties": {
+    "research_complete": { "type": "boolean", "const": true },
+    "topic": { "type": "string" },
+    "answer": { "type": "string" },
+    "common_approaches": { "type": "array", "items": { "type": "string" } },
+    "key_constraints": { "type": "array", "items": { "type": "string" } },
+    "pain_points": { "type": "array", "items": { "type": "string" } },
+    "recent_developments": { "type": "array", "items": { "type": "string" } },
+    "failed_approaches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["approach", "why_it_failed"],
+        "properties": {
+          "approach": { "type": "string" },
+          "why_it_failed": { "type": "string" }
+        }
+      }
+    },
+    "opportunity_signals": { "type": "array", "items": { "type": "string" } },
+    "transferable_patterns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_domain", "pattern", "applicability"],
+        "properties": {
+          "source_domain": { "type": "string" },
+          "pattern": { "type": "string" },
+          "applicability": { "type": "string" }
+        }
+      }
+    },
+    "contested_or_uncertain": { "type": "array", "items": { "type": "string" } },
+    "surprises": { "type": "array", "items": { "type": "string" } },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "url", "date"],
+        "properties": {
+          "title": { "type": "string" },
+          "url": { "type": "string" },
+          "date": { "type": "string" }
+        }
+      }
+    },
+    "confidence": { "enum": ["high", "medium", "low"] },
+    "searches_used": { "type": "integer" }
+  }
+}

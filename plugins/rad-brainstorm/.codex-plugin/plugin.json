@@ -1,0 +1,44 @@
+{
+  "name": "rad-brainstorm",
+  "version": "4.0.0",
+  "description": "Anti-anchoring brainstorming for Codex. It draws out the user's thinking before adding ideas, keeps generation separate from evaluation, and supports quick sessions, full sessions, root-cause analysis, idea evaluation, and software design sprints.",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-brainstorm",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "keywords": [
+    "brainstorming",
+    "ideation",
+    "anti-anchoring",
+    "scamper",
+    "six-thinking-hats",
+    "five-whys",
+    "idea-evaluation",
+    "design-sprint"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RAD Brainstorm",
+    "shortDescription": "Think first, then build better ideas with Codex.",
+    "longDescription": "RAD Brainstorm helps users explore ideas without anchoring them on an AI-generated list. It asks for the user's thinking first, separates idea generation from evaluation, and scales from a quick bounded pass to a full facilitated session. It also includes Five Whys root-cause analysis, structured idea evaluation, and software design sprints. It never implements application code.",
+    "developerName": "RAD",
+    "category": "Productivity",
+    "capabilities": [
+      "Facilitated brainstorming",
+      "Creative techniques",
+      "Root-cause analysis",
+      "Idea evaluation",
+      "Software design specs"
+    ],
+    "defaultPrompt": [
+      "Run a quick brainstorm on this topic.",
+      "Help me explore this idea without anchoring me on your answers.",
+      "Use Five Whys to find the root cause of this problem.",
+      "Help me compare these ideas before I choose one.",
+      "Turn this chosen software idea into a reviewable design spec."
+    ]
+  }
+}
