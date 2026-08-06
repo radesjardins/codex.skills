@@ -1,70 +1,43 @@
-# Context Management: Document & Clear Protocol
+# Bounded Context Rules
 
-AI reasoning quality tends to degrade as context windows fill — observable in longer coding sessions as repeated suggestions, hallucinated paths, and dropped instructions. The exact threshold varies by model and workload; the directional effect is widely reported. A plan should be structured so work can be done in bounded sessions with clean context boundaries between milestones. The planner builds those boundaries into the plan; the executor (or a wrapping skill) actually invokes `/clear` and rehydrates.
+Plans should let a fresh coding agent start one milestone without loading the full project history.
 
-This reference informs two things: the **Checkpoints** section the planner writes into `plan.md` (a stop-and-clear boundary after every milestone), and the `risk-assessor`'s context-management pass (is each milestone small enough to finish in one bounded session?).
+## Plan rules
 
-## The Document & Clear Pattern
+- Aim for two or three tasks per milestone.
+- Warn when a milestone exceeds five tasks.
+- Warn when a plan exceeds 20 live tasks.
+- Keep each task within one bounded work session when practical.
+- Put the outcome, paths, dependencies, proof, and recovery need in the task block.
+- Keep completed work in `## Shipped` outside the live Tasks section.
 
-### Step 1: Checkpoint (Dump)
+## Milestone checkpoint
 
-At a milestone boundary: run the milestone's `Validate` commands, confirm each task's `Done when`, and commit all verified work to git. The commit history plus `plan.md` are the durable record — nothing needs to live only in the conversation.
+Each milestone checkpoint names:
 
-### Step 2: Wipe
+- the tasks and owner checks that form the gate;
+- the focused proof that the milestone works;
+- the safe recovery strategy;
+- the next milestone or owner decision.
 
-Run `/clear` to reset the session. This erases conversational context.
+The plan does not commit, clear a task, or start a new task. The execution workflow follows repository rules for commits and task boundaries.
 
-### Step 3: Rehydration
+## Fresh-context handoff
 
-Start a fresh session pointed at:
-1. `docs/plan.md` — the plan; load the current milestone and its tasks, not the whole file
-2. The committed changes on the Git branch
-3. The operating manual (`AGENTS.md`) for conventions, if the project has one
+When the runtime or owner starts a fresh task, load:
 
-The agent now operates with a clean context window, focused only on the next milestone.
+1. repository instructions;
+2. the plan objective, release map, and Outcome coverage;
+3. the current milestone and its live tasks;
+4. the relevant code and tests;
+5. the latest verified handoff when one exists.
 
-## Trigger Conditions
+Do not load every shipped task or every repository document by default.
 
-### Mandatory (Always clear)
-| Condition | Why |
-|-----------|-----|
-| **Milestone completion** | Natural boundary; commit, reset |
-| **Task transitions between unrelated areas** | Prevents context bleed |
-| **After 2 consecutive failures** | Context is polluted with failed approaches |
-| **Major topic change** | Database-refactor context should not bleed into UI work |
+## Review questions
 
-### Warning (Clear soon)
-| Condition | Why |
-|-----------|-----|
-| **Approaching context capacity** | Reasoning degrades well before the hard limit |
-| **Agent repeating itself** | Attention losing earlier instructions |
-| **Responses getting vague** | Model losing grip on specifics |
-| **Unexpected suggestions** | Proposing things outside plan scope |
-
-### Critical (Clear immediately)
-| Condition | Why |
-|-----------|-----|
-| **Stuck in a correction loop** | 2+ failed attempts = polluted context. Stop. Clear. Restart. |
-| **Auto-compaction triggered** | The runtime silently summarizes near capacity — lossy |
-| **Hallucinating file paths or APIs** | Confidence in non-existent code = context corruption |
-
-## Context Budget Rules
-
-### Session duration
-- **Target:** one bounded milestone per session
-- **Rule:** better to clear too early than too late
-
-### Keep in active context
-- The current milestone (not the whole plan)
-- Files being actively modified (not the whole codebase)
-- Relevant test files for the current task
-- The task's `Validate` and `Rollback`
-
-### Externalize
-- Completed work → commit to git
-- Durable facts the planning conversation surfaced (product behavior, decisions, architecture) → the update-prompt, for the user to record in the durable docs (the planner does not write those)
-- The full plan → `docs/plan.md`; load only the current milestone
-
-## Sizing for context (what the risk-assessor checks)
-
-A milestone that can't finish inside one bounded session is too big. The plan's size discipline (2–3 tasks per milestone, ~50% context budget) exists so each milestone fits a clean session with room for the inevitable back-and-forth. A milestone carrying more than ~5 tasks is a split candidate. Each milestone gets a Checkpoint in `plan.md` with its own gate / validate / rollback — that's the stop-and-clear boundary.
+- Can a fresh agent explain what the current milestone ships?
+- Are the relevant paths and proof inside each task?
+- Can the milestone finish in one bounded run?
+- Does the checkpoint state what happens next?
+- Is context limited to current work and its direct evidence?

@@ -1,161 +1,118 @@
 ---
 name: replan
 description: >
-  Use when the user says "replan", "update the plan",
-  "re-baseline the plan", "the plan is out of date", "we shipped the MVP — what's
-  next", "mark this milestone done", "the plan doesn't match reality anymore",
-  "pull the next version into the plan", "adjust the plan", or when an existing
-  `docs/plan.md` has diverged from what actually got built. Evidence-based plan
-  update: reads git history + docs/handoff.md to mark shipped work (history
-  preserved, never deleted), re-baselines remaining tasks, gives every parked
-  idea in docs/ideas.md a fair hearing, and pulls the next release-map horizon
-  into detailed milestones when the current one is done. Re-lints and runs a
-  single risk pass; nothing is final until the user approves.
+  Use when the user says update, revise, restructure, or re-baseline an existing
+  implementation plan, or when shipped work, scope changes, parked ideas, or new
+  evidence made the current plan inaccurate. Reconciles the plan with Git and
+  repository evidence, previews Added/Modified/Removed changes, preserves shipped
+  history, updates outcome coverage, and runs plan checks. It does not implement code.
 ---
 
-# Replan — evidence-based plan update
+# Replan
 
-**Codex path rule:** Resolve the plugin root as the directory two levels above this
-`SKILL.md`. Every `references/` and `scripts/` path below is relative to that root;
-convert it to an absolute path before running a script.
+Bring the current plan back in line with evidence. Preserve history and require owner approval before structural changes.
 
-Bring `docs/plan.md` back in line with reality without losing history or re-running
-the whole planning conversation. Real projects diverge from the plan by milestone 2 —
-this is the sanctioned way to absorb that, instead of hand-editing the plan or
-starting over.
+Do not write application code or run project tests. Write the detected plan path and, when already present, append-only decisions or ideas entries. Put other document changes in `## Durable follow-ups` inside the plan.
 
-**Replan is the single deliberate direction-change moment.** Mid-session ideas and
-pivots append to `docs/ideas.md` and block nothing; here is where each one gets its
-fair hearing. Pivots are cheap *because* they're recorded — chaos comes from
-pivoting without recording, not from pivoting.
+## Resolve paths and contract
 
-**Doc model:** the repo's AGENTS.md doc-model block is authoritative when present —
-conform to its headings, file names, and vocabulary (Goal/Release in the PRD;
-Milestone/Task in plan.md). When absent, keep the plan-template defaults.
+Resolve the plugin root as the directory two levels above this `SKILL.md`. Read `references/plan-template.md` as the plan authority. A repository `AGENTS.md` document model overrides its defaults.
 
-**Boundary with rad-repo:** its `wrapup` makes one-line status touches ("M2
-shipped", stamp the date) scoped to a session. `replan` is the *structural* event —
-re-sequencing, re-scoping, pulling the next horizon into detail. Wrapup maintains;
-replan restructures.
+## Companion-skill rule
 
-**CRITICAL: No implementation code, no source files. The only files written are
-`docs/plan.md` and (conditionally) `docs/[date]-update-prompt.md`.** An existing PRD
-is never edited — contradictions surface into the update-prompt.
+Name a RAD Repo or RAD Brainstorm skill only when current evidence needs the exact workflow, the exact skill appears in the current available-skill list, and it would add clear value. Report the need in plain language when absent. Never invoke a suggested companion unless the owner asks or accepts.
 
-## 1. Gather evidence — not memory
+## 1. Gather evidence
 
-Read in one parallel batch: `docs/plan.md`, `docs/handoff.md`, `docs/prd.md`,
-`docs/ideas.md`, `AGENTS.md` (each if present). Then git, scoped by the plan's
-`**Updated:**` date:
+Detect the plan in this order: `docs/plan.md`, `docs/planning/current-execution.md`, `docs/planning/current.md`, `PLAN.md`.
 
-```bash
-git log --oneline --since="<plan Updated date>"
-git diff --stat $(git rev-list -1 --before="<plan Updated date>" HEAD)..HEAD
-git status --short
-```
+If no plan exists, route to `plan` for clear work or `rescue` for an unclear project.
 
-If no plan exists, stop and recommend `rad-plan:plan` (fresh) or
-`rad-plan:rescue` (project in an unclear state).
+Read in one batch when present:
 
-## 2. Classify, against evidence
+- the full plan;
+- `docs/handoff.md`, `docs/prd.md`, `docs/ideas.md`, `docs/decisions.md`, and `AGENTS.md`;
+- Git history and changed paths since the plan's Updated date;
+- current worktree status.
 
-For each milestone and task in the plan, classify from the diff, commit messages,
-file existence, and the handoff's validation record:
+Use repository evidence instead of chat memory. Do not classify unverified work as shipped.
 
-- **Shipped** — the artifacts exist and validation evidence supports it.
-- **Partially done** — some artifacts exist; name what's missing.
-- **Not started** — no evidence.
-- **Obsolete** — the work no longer makes sense given what actually happened.
+## 2. Classify the current plan
 
-Where the evidence is ambiguous, ask one batched set of questions, not a drip.
-Never silently guess a milestone's fate.
+Classify every live milestone and task:
 
-## 3. Present the assessment — plain language first
+- **Shipped:** artifacts and validation evidence support completion.
+- **Partially done:** some evidence exists; name what is missing.
+- **Not started:** no implementation evidence exists.
+- **Obsolete:** the work no longer fits current approved direction.
+- **Drifted:** implementation exists that the plan did not name.
 
-Before touching the file:
+Ask one batched question set for ambiguous items. The owner confirms obsolete work and surprises.
+
+If `docs/ideas.md` exists, give each relevant parked idea a fair hearing:
+
+- pull in;
+- keep parked;
+- reject with a short reason appended to the existing entry.
+
+## 3. Preview the delta
+
+Before editing, show:
 
 ```text
-Plan vs reality:
-Shipped:        <milestones/tasks, with the evidence in one clause each>
-Partially done: <what's missing, in user terms>
-Not started:    <...>
-Looks obsolete: <what and why — needs your confirmation>
-Drifted:        <anything built that the plan never mentioned>
+Plan versus evidence:
+Shipped: <items and evidence>
+Partial: <items and missing work>
+Unstarted: <items>
+Obsolete: <items and reason needing confirmation>
+Drifted: <unplanned implementation>
+
+Proposed plan delta:
+Added: <new outcomes, milestones, tasks, or assumptions>
+Modified: <scope, order, validation, or meaning changes>
+Removed: <obsolete live work moving to preserved history>
 ```
 
-Confirm the obsolete calls and any surprises with the user before restructuring.
-Where you disagree with a call the user wants to make, challenge once — one honest,
-short assessment — then commit to their answer without relitigating.
+Wait for owner approval before restructuring.
 
-## 3b. Hear the parked ideas
+## 4. Update the plan
 
-If `docs/ideas.md` has entries not yet dispositioned, give each a fair hearing —
-present them alongside the assessment and settle each one of three ways:
+On approval:
 
-- **Pull in** — it becomes properly specced work in the restructured plan.
-- **Keep parked** — still plausible, not now; it stays in ideas.md untouched.
-- **Reject** — append a one-line "rejected: <why>" annotation to its ideas.md entry
-  (append, never delete — dead ideas stay recorded so they don't get re-proposed).
+1. Move shipped task blocks to `## Shipped`, newest first.
+2. Rewrite live dependencies that pointed to shipped tasks as `none - predecessor shipped` without the old task ID.
+3. Split partial work into a shipped note and a new live task.
+4. Strike obsolete milestones with a reason and move their tasks to `## Shipped`.
+5. Pull Next into detailed Now work only after the owner confirms its scope.
+6. Strike invalid assumptions and keep them. Add confirmed replacements.
+7. Refresh `## Outcome coverage` so every live outcome maps to live tasks and final proof.
+8. Mark task file entries `[existing]` or `[new]` after a bounded check of the relevant code surface.
+9. Warn when a milestone has more than five tasks or the plan has more than 20 live tasks.
+10. Add one dated Added/Modified/Removed note under `## Durable follow-ups` only when a durable document also needs a later change.
+11. Set Status to DRAFT, update the date, and add the 7.1 marker when the plan is upgraded to the new contract.
 
-## 4. Restructure — history preserved, never deleted
+Use safe recovery rules from `references/failure-state-template.md`. Do not place destructive Git or recursive-delete commands in Rollback.
 
-On the user's go-ahead, update `docs/plan.md`:
+## 5. Check and approve
 
-1. **Shipped milestones** — mark ✅ in the Milestones table; **move** their task
-   blocks to a `## Shipped` section at the end of the file (create it if absent,
-   newest first). Never delete them. `## Shipped` lives outside `## Tasks`, so the
-   linter doesn't re-validate history.
-2. **Dependency rewrite** — remaining tasks that depended on a moved task get
-   `Depends on: none — predecessor shipped`. Do **not** leave the old task ID in the
-   field: the linter reads any `T<n>` in `Depends on` as a live reference and will
-   flag a phantom dependency.
-3. **Partially done** — split: the done part moves to `## Shipped` as a note; the
-   remainder becomes a properly specced task (all six fields) with a fresh ID.
-4. **Obsolete** — strike through in the Milestones table with a one-line reason;
-   move its task blocks to `## Shipped` under an "Obsolete —" note. Same dependency
-   rewrite.
-5. **Horizon pull** — if the "Now" horizon is substantially shipped, promote "Next"
-   from the Release map into detailed milestones and six-field tasks (goal-backward,
-   risk-first, 2–3 tasks per milestone — same discipline as `plan`), and refresh the
-   Release map: the new work becomes "Now", "Later" themes feed the new "Next".
-   Confirm the promoted scope with the user — this is the moment the V1 outline
-   becomes real commitments.
-6. **Assumptions** — strike through any the evidence invalidated (never delete);
-   propose new ones from what was learned, confirm/deny.
-7. Set `**Status:** DRAFT`, stamp `**Updated:**` with today's date.
-
-## 5. Validate, review, approve
-
-Run the linter (use `python3`, or `python` on Windows):
+Run the linter against the detected plan path:
 
 ```bash
-python3 <plugin-root>/scripts/plan-lint.py docs/plan.md --json
+python <plugin-root>/scripts/plan-lint.py <plan-path> --json
 ```
 
-Fix CRITICAL/HIGH. Then a **single** risk pass — spawn one bounded Codex subagent
-named `risk_assessor` with `fork_turns: all`, require JSON-only output and no file
-edits, substitute `{plugin_root}` with the absolute plugin root, and use
-(`references/subagent-prompts/risk-assessment.md`, `max_iterations: 1`), focused on
-the restructured and newly promoted work; note in the dispatch that `## Shipped` is
-history and out of scope. Fix blocking issues once; surface the rest.
+Fix CRITICAL and HIGH findings.
 
-Present per `plan`'s review shape (step 5: plain summary → release map → decisions → detail).
-On approval: flip to `APPROVED`, re-stamp, write the update-prompt if anything durable
-surfaced (e.g. the PRD now describes behavior that shipped differently).
+Run one bounded, read-only risk pass using `references/subagent-prompts/risk-assessment.md`. Pass the detected plan path and note that `## Shipped` is history and outside review. Validate the JSON with `validate-json.py`. Fix blocking issues once and surface anything unresolved.
 
-## What this skill does NOT do
+Present the new release map, outcome coverage, Added/Modified/Removed summary, milestones, and checks. The plan stays DRAFT until the owner approves it.
 
-- Does not write or edit source files, run tests, or fix anything in the code.
-- Does not delete history — shipped/obsolete work moves to `## Shipped` or is struck
-  through, always recoverable.
-- Does not edit an existing `docs/prd.md` or other durable docs — surfaces changes
-  via the update-prompt. (The only ideas.md write is the append-only "rejected:
-  <why>" annotation.)
-- Does not re-run full Discovery — that's `plan` (fresh) or `rescue` (unclear state).
-- Does not auto-approve — the restructured plan is DRAFT until the user says lock it.
+After approval, set Status to APPROVED, update the date, append confirmed entries only to decisions or ideas files that already exist, and run the linter once on the final plan.
 
-## Key references
+## Boundaries
 
-- `references/plan-template.md` — structure, the `## Shipped` rule, dependency-rewrite rule
-- `references/subagent-prompts/risk-assessment.md` — single-pass dispatch
-- `scripts/plan-lint.py` — re-run after every restructure
+- Preserve shipped and obsolete history.
+- Do not edit an existing PRD or other durable document.
+- Do not create a temporary update-prompt.
+- Do not execute or test application code.
+- Do not invoke companion skills without owner acceptance.

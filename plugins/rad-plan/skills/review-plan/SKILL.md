@@ -1,129 +1,108 @@
 ---
 name: review-plan
 description: >
-  Use when the user says "review my plan", "audit this plan",
-  "check my implementation plan", "is this plan complete", "what's missing from my
-  plan", "validate my plan", "plan review", "check plan quality", "risk review",
-  "check dependencies", "are there any risks in my plan", or has an existing plan
-  (`docs/plan.md`) that needs a quality audit before execution begins.
+  Use when the user asks to review, audit, validate, or check an existing
+  implementation plan for completeness, dependencies, risks, rollback safety,
+  outcome coverage, task size, or execution readiness. Runs mechanical lint and
+  one read-only risk review. It changes the plan only after explicit approval.
 ---
 
-# Review Plan — implementation plan quality audit
+# Review Plan
 
-**Codex path rule:** Resolve the plugin root as the directory two levels above this
-`SKILL.md`. Every `references/` and `scripts/` path below is relative to that root;
-convert it to an absolute path before running a script.
+Audit an existing plan in two layers:
 
-Audit an existing `plan.md` in two layers:
+1. Mechanical checks with `scripts/plan-lint.py`.
+2. Judgment checks with the risk assessor.
 
-1. **Mechanical** via `scripts/plan-lint.py` — required sections, per-task field
-   presence, dependency resolution, no vague language. Deterministic; no LLM judgment.
-2. **Judgment** via the `risk-assessor` agent — anti-pattern scanning, architecture
-   concerns, rollback quality, checkpoint placement, TDD strategy.
+Do not write durable documents. Edit the plan only after the owner accepts specific fixes.
 
-This is the quality gate between planning and execution. It does not write durable docs
-and does not modify the plan unless explicitly authorized (Step 5).
+## Resolve paths
 
-## Workflow
+Resolve the plugin root as the directory two levels above this `SKILL.md`.
 
-### 1. Locate the plan
+Detect the plan in this order unless the user supplied a path:
 
-If a path was provided, read it. Otherwise detect the plan in order:
-`docs/plan.md`, `docs/planning/current-execution.md`,
-`docs/planning/current.md`, root `PLAN.md`. Read it completely.
+1. `docs/plan.md`
+2. `docs/planning/current-execution.md`
+3. `docs/planning/current.md`
+4. `PLAN.md`
 
-If none exists, report that there's no plan to review and recommend `rad-plan:plan`.
+Read the plan completely. If none exists, explain that a plan is needed and suggest the `plan` skill.
 
-### 2. Mechanical lint
+## 1. Mechanical review
 
-Use `python3`, or `python` on Windows:
+Run against the detected path:
 
 ```bash
-python3 <plugin-root>/scripts/plan-lint.py <plan-path> --json
+python <plugin-root>/scripts/plan-lint.py <plan-path> --json
 ```
 
-Parse the JSON. It reports missing required sections, tasks missing any of the six
-fields (Objective, Files, Depends on, Done when, Validate, Rollback), unresolved or
-cyclic dependencies, and vague language. Exit 1 = issues, 0 = clean. These findings are
-deterministic and **bypass the risk-assessor** — they feed straight into the report.
+The linter checks the implemented contract: sections, six task fields, duplicate sections and IDs, dependencies, outcome links, 7.1 path labels, vague proof, live-task warning, and unsafe rollback command forms.
 
-### 3. Delegate to risk-assessor
+Do not send deterministic findings to a model for debate.
 
-Spawn one bounded Codex subagent named `risk_assessor` with `fork_turns: all`, using
-the substituted template from `references/subagent-prompts/risk-assessment.md`.
-Require JSON-only output and no file edits. Substitute `{plugin_root}` with the
-absolute plugin root. Pass the plan content,
-`iteration_number: 1`, `max_iterations: 1` (review-plan is a single pass; the iterative
-loop belongs to `rad-plan:plan`), and a note that the mechanical layer already ran —
-focus judgment on what scripts can't check (anti-patterns, architecture, rollback
-quality, checkpoint placement, TDD strategy).
+## 2. Judgment review
 
-If durable context docs exist and are relevant (e.g. a `docs/prd.md`,
-`docs/architecture.md`, a decision log), read them read-only and pass them as supporting
-context so the assessor judges the plan against stated product/architecture intent. Do
-not require them — many projects won't have them.
+Read `references/anti-patterns.md`, `references/failure-state-template.md`, `references/tdd-constraints.md`, and `references/context-management.md`.
 
-Validate the agent's JSON:
+Read relevant approved product or architecture documents when present. Pass them as read-only supporting context.
+
+Dispatch one bounded, read-only `risk_assessor` using `references/subagent-prompts/risk-assessment.md`. Pass the detected plan path, mechanical findings, and supporting context. Require JSON-only output and no file edits.
+
+Validate the response:
 
 ```bash
-echo "$SUBAGENT_OUTPUT" | python3 <plugin-root>/scripts/validate-json.py \
+python <plugin-root>/scripts/validate-json.py \
   <plugin-root>/references/subagent-prompts/risk-assessment.schema.json - --extract-from-markdown
 ```
 
-Re-prompt once on schema failure, then fall back to markdown parsing against the
-prompt contract. Key fields: `verdict` (`APPROVE` | `REVISE` | `RETHINK`),
-`blocking_issues[]`, `advisory_issues[]`, `escalation_required`.
+Re-prompt once on schema failure. Review only live work. `## Shipped` is history.
 
-### 4. Present results
+## 3. Report
+
+Use this shape:
 
 ```markdown
 # Plan Review Report
 
 **Plan:** [path]
-**Mechanical lint:** [PASS | N issues]
-**Risk-assessor verdict:** APPROVE | REVISE | RETHINK
-**Overall recommendation:** [actionable next step]
+**Mechanical lint:** [PASS or issue count]
+**Risk verdict:** [APPROVE, REVISE, or RETHINK]
+**Recommendation:** [next action]
 
-## Mechanical issues (from plan-lint.py)
-- [deterministic — no judgment debate]
+## Mechanical findings
+[Deterministic findings]
 
-## Critical issues (block execution until fixed)
-- [issue with specific fix]
+## Blocking risks
+[CRITICAL and HIGH judgment findings]
 
-## Improvements (recommended before execution)
-- [issue with fix]
+## Improvements
+[MEDIUM and LOW findings]
 
-## Optional enhancements
-- [nice-to-have]
-
-## Escalation
-[only when verdict=RETHINK — recommend rad-brainstormer:design-sprint]
+## Strong parts
+[Evidence-backed positive observations]
 ```
 
-Apply production-grade standards by default: every task needs both Validate and
-Rollback; auth/payment/data tasks need a security checkpoint; external integrations need
-error handling in the task spec. Treat gaps in these as blocking.
+Check whether:
 
-**Horizon rule:** task-level detail is required only for the "Now" horizon. A Release
-map whose "Next"/"Later" entries are outlines and themes is **correct by design** — do
-not flag them as under-specified. A `## Shipped` section is history — out of review
-scope entirely.
+- outcomes are observable and each has tasks and final proof;
+- task paths match the repository or are marked new;
+- the hardest unknown appears early;
+- validation proves the outcome and covers risk-based failures;
+- rollback restores real state without erasing unrelated work;
+- every milestone has a checkpoint;
+- a milestone exceeds five tasks or the live plan exceeds 20 tasks;
+- the plan conflicts with approved product, architecture, or repository facts.
 
-### 5. Offer fixes (only when authorized)
+## 4. Offer fixes
 
-If `verdict` is `REVISE`, offer to fix issues directly in the plan file. For each fix,
-explain the change, show before/after, and modify **only** `plan.md` — never create
-implementation files, never write durable docs. Mechanical issues (missing field, vague
-phrase) usually have unambiguous fixes; offer to apply those directly.
+For REVISE, offer the smallest exact plan edits. Explain each change before applying it. Modify only the plan after owner approval, then run the linter once.
 
-If `verdict` is `RETHINK`, do not offer fixes — the architecture has fundamental issues
-task-level edits won't resolve. Recommend `rad-brainstormer:design-sprint`, then
-re-review.
+For RETHINK, explain the product, scope, or architecture choice that must change. Name a `rad-brainstorm:*` skill only when the exact skill is available, the need is real, and it would add value. Never invoke it without owner acceptance.
 
-## What this skill does NOT do
+## Boundaries
 
-- Does not modify the plan unless authorized in Step 5.
-- Does not write durable docs (PRD, architecture, decision log) — if the review surfaces
-  a durable change, name it in the report for the user to apply.
-- Does not test that the plan works — that's the executor's job.
-- Does not re-run the iterative risk loop — that belongs to `rad-plan:plan`.
+- Do not implement code.
+- Do not edit a PRD, design, architecture document, or repository instruction.
+- Do not rerun iterative review loops.
+- Do not treat coarse Next or Later entries as defects.

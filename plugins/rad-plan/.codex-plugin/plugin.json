@@ -1,7 +1,7 @@
 {
   "name": "rad-plan",
-  "version": "7.0.0",
-  "description": "Interview-driven, risk-first implementation planning for Codex with release maps, mechanical linting, adversarial review, rescue, replan, and plan-audit workflows. It plans work and documentation; it does not implement application code.",
+  "version": "7.1.0",
+  "description": "Evidence-based implementation planning for Codex with outcome coverage, safe recovery, focused linting, risk review, rescue, replan, and plan-audit workflows. It plans work and documentation; it does not implement application code.",
   "author": {
     "name": "RAD",
     "url": "https://github.com/radesjardins"
@@ -24,7 +24,7 @@
   "interface": {
     "displayName": "RAD Plan",
     "shortDescription": "Build, rescue, update, and audit executable project plans.",
-    "longDescription": "RAD Plan runs an evidence-backed discovery interview, creates Now/Next/Later release maps and executable milestone/task plans, mechanically validates plan structure, and uses Codex subagents for stack evaluation and adversarial risk review. It also rescues unclear projects, re-baselines plans from git evidence, and audits existing plans without implementing application code.",
+    "longDescription": "RAD Plan checks the real repository, asks focused questions, and creates one executable project plan with outcome coverage and safe recovery steps. It can rescue unclear projects, update plans from Git evidence, and audit existing plans. Quick mode fits small changes. Full mode adds deeper discovery and bounded risk review. It does not implement application code.",
     "developerName": "RAD",
     "category": "Productivity",
     "capabilities": [

@@ -1,118 +1,55 @@
-# Golden Path: AI-Native Technology Selection Matrix
+# Stack Decision Scorecard
 
-> **Last verified:** 2026-04-25 (model knowledge cutoff: January 2026)
-> **Status:** Opinionated reference. The `stack-advisor` subagent live-checks framework versions and breaking changes against current primary documentation — **trust the live verification when it disagrees with this matrix.** Frameworks evolve faster than this file is updated.
+Use this reference only when the work needs a real technology choice. Keep the existing stack when it can meet the approved requirement.
 
-AI models tend to produce more reliable code in strongly typed, opinionated, well-documented frameworks that are heavily represented in training data. TypeScript is the recommended default — its strict type safety acts as a continuous feedback loop that surfaces logical errors at generation time. The exact rate of caught errors depends on the code domain; the directional benefit is widely observed in AI-assisted workflows but not precisely measured here.
+The stack advisor must make one recommendation. It must use current primary sources for versions, compatibility, maintenance, security notices, licensing, pricing, and deployment support.
 
-## AI-Native Proficiency Tiers
+## Decision criteria
 
-### Primary Tier (Highest AI Accuracy)
-| Technology | Why AI Excels | Best For |
-|-----------|---------------|----------|
-| **TypeScript** | Strict types = continuous error detection, massive training corpus | Everything (non-negotiable default) |
-| **Next.js 14-15** | Enforces standard file structures, clear boundaries, reduces hallucinations | Full-stack web apps, SSR/SSG |
-| **FastAPI** | Pydantic models auto-generate docs, type-safe contracts | Python APIs, ML backends |
+| Criterion | Question | Evidence |
+|---|---|---|
+| Existing fit | Can the current stack meet the requirement without a new system? | Repository code, architecture, and current deployment |
+| User fit | Can the owner maintain and pay for it? | Confirmed skills, budget, accounts, and constraints |
+| Agent accuracy | Do current docs, types, schemas, and error messages give the coding agent clear feedback? | Primary docs and a small proof when needed |
+| Test support | Can the important behavior and failures be checked locally or in CI? | Official test guidance and repository patterns |
+| Deployment fit | Does it work on the approved target without a new operating burden? | Current platform documentation |
+| Maintenance | Is the project active and is the selected version supported? | Release and support policy |
+| Compatibility | Do the selected versions work together? | Primary compatibility tables and release notes |
+| Security and license | Are current advisories and license terms acceptable? | Official advisory and license sources |
+| Cost | What new recurring cost, service, or operational work appears? | Current pricing and service limits |
+| Need | Which approved requirement fails without this addition? | PRD, interview answer, or plan outcome |
 
-### Secondary Tier (Strong Predictability)
-| Technology | Why AI Excels | Best For |
-|-----------|---------------|----------|
-| **Go** | Minimal syntactic ambiguity, robust stdlib, near-C++ speeds | High-throughput microservices |
-| **Rust** | Compiler-enforced safety, clear error messages guide AI | Systems programming, performance-critical |
-| **NestJS** | Opinionated structure, decorator patterns | Enterprise Node.js APIs |
-| **Tailwind CSS** | Utility-first = predictable output, no custom CSS hallucinations | All frontend styling |
-| **Astro** | File-based routing, island architecture, clear boundaries | Content sites, documentation |
+## Decision rules
 
-### Niche/Legacy Tier (High Hallucination Risk)
-| Technology | Risk Factor | Mitigation |
-|-----------|-------------|------------|
-| **Ruby on Rails** | Magic methods, convention-over-configuration confuses LLMs | Pin exact versions, provide explicit examples |
-| **Django** | Implicit ORM behavior, complex middleware chains | Strict type hints, explicit queryset annotations |
-| **PHP 8** | Historical baggage in training data mixes old/new patterns | Use strict_types, modern PHP only |
-| **jQuery** | AI may suggest it when vanilla JS or modern frameworks are better | Explicitly exclude in AGENTS.md |
+1. Prefer the current stack when it meets the requirement.
+2. Add the fewest new tools and services.
+3. Treat user skill, deployment limits, and paid services as hard constraints.
+4. Compare only plausible options.
+5. Pin versions only when the repository uses pins or compatibility requires one.
+6. State uncertainty. Do not invent benchmark claims about agent accuracy.
+7. Stop when requirements conflict or no supported option fits.
 
-### Data/AI Tier (Domain Dominance)
-| Technology | Why AI Excels | Best For |
-|-----------|---------------|----------|
-| **Python** | Dominant in ML/data training data | Data processing, ML pipelines |
-| **SQL** | Extremely well-represented, high accuracy | All database operations |
-| **pgvector** | Integrated vector search, no sidecar needed | AI memory, embeddings, RAG |
+## Output
 
-## Project-Type Decision Matrix
+Return:
 
-### Startups and MVPs ("Modern Standard")
-**Goal:** Maximum speed, end-to-end type safety, seamless deployment
+- recommended choice and version;
+- one short reason tied to the requirement;
+- current-stack fit;
+- alternatives considered and why they lost;
+- new dependencies, services, cost, and operating work;
+- compatibility notes;
+- primary verification sources and check date;
+- confidence and any owner decision still required.
 
-| Layer | Recommended | Alternative | Avoid |
-|-------|------------|-------------|-------|
-| Frontend | Next.js + TypeScript | Astro (content-heavy) | CRA, vanilla React |
-| Backend | Node.js (via Next.js API routes) | FastAPI (if Python needed) | Express without TypeScript |
-| Database | PostgreSQL | Supabase (managed Postgres) | MongoDB (for relational data) |
-| ORM | Drizzle or Prisma | - | Raw SQL for CRUD apps |
-| Styling | Tailwind CSS | - | CSS-in-JS, SASS |
-| Auth | Auth.js / Supabase Auth | Clerk | Custom auth (unless required) |
-| Deployment | Vercel / Coolify | Railway | Manual Docker without CI |
+## When live research is required
 
-**Why:** T3 Stack provides end-to-end type safety -- if AI changes a schema, the IDE highlights every affected component.
+Use current primary sources when:
 
-### AI-Native and Data-Intensive Applications
-**Goal:** Heavy LLM integration, ML ecosystem, RAG pipelines
+- a new framework, service, or deployment target is proposed;
+- a version or compatibility claim affects the plan;
+- pricing or service limits affect scope;
+- a security advisory can change the decision;
+- the repository uses a version that may be outside support.
 
-| Layer | Recommended | Alternative | Avoid |
-|-------|------------|-------------|-------|
-| Frontend | React or Svelte | Astro (docs/dashboard) | Heavy SPA frameworks |
-| Backend | Python (FastAPI) | Node.js + LangChain.js | Flask without type hints |
-| Database | PostgreSQL + pgvector | - | Separate vector DB sidecar |
-| ML Framework | PyTorch / Transformers | TensorFlow | Custom from scratch |
-| API Contracts | Pydantic models | Zod (if Node.js) | Untyped JSON |
-
-**Why:** FastAPI natively handles the Python ML ecosystem while auto-generating API docs through Pydantic models.
-
-### Enterprise Applications and High-Performance Microservices
-**Goal:** Long-term stability, strict governance, high throughput
-
-| Layer | Recommended | Alternative | Avoid |
-|-------|------------|-------------|-------|
-| Frontend | Angular or Vue (Nuxt) | Next.js (if team knows React) | Svelte (smaller ecosystem) |
-| Backend | Go or .NET | Java Spring Boot | Node.js (for CPU-intensive) |
-| Database | PostgreSQL + Redis | MySQL (if existing) | NoSQL as primary |
-| API Style | gRPC (internal) + REST (external) | GraphQL (if client-driven) | REST-only for microservices |
-| Orchestration | Kubernetes | Docker Compose (small scale) | Manual deployment |
-
-**Why:** Go provides exceptional throughput with simple syntax that makes AI code reviews straightforward.
-
-### Universal Database Default
-For 80% of new projects: **PostgreSQL**
-- JSONB support for NoSQL-like flexibility
-- pgvector for integrated AI memory (vector storage)
-- No architectural brittleness of maintaining separate vector DB
-- Mature, well-documented, AI generates accurate SQL
-
-## Stack Evaluation Checklist
-
-When evaluating a stack recommendation, verify:
-
-- [ ] All components are in Primary or Secondary tier (or have explicit justification)
-- [ ] TypeScript is used wherever possible
-- [ ] Database choice matches data access patterns (relational vs. document vs. vector)
-- [ ] Framework has active maintenance and recent releases
-- [ ] Team has experience or framework has strong learning resources
-- [ ] Deployment target is compatible with chosen stack
-- [ ] No Niche/Legacy tier choices without explicit user requirement
-- [ ] API contracts are type-safe end-to-end
-
-## When to Search for Updated Information
-
-Always verify with Context7 or web search when:
-- User mentions a specific framework version (check if latest)
-- Recommending deployment platforms (pricing/features change frequently)
-- Evaluating new frameworks not in training data
-- Comparing performance benchmarks (results change with releases)
-- Checking library compatibility with specific framework versions
-
-## Honest limits of this matrix
-
-- The tier assignments are based on the maintainer's experience with AI codegen accuracy as of the date in the header — they are not derived from a published benchmark.
-- "Massive presence in training data" is a real factor for code accuracy but cannot be precisely quantified per framework — treat tier rankings as directional, not authoritative.
-- The Niche/Legacy tier is not a verdict on framework quality. Rails and Django produce excellent applications when humans write the code; the matrix is specifically about AI codegen reliability.
-- This file ages quickly. If the date in the header is more than 6 months stale, weight live verification more heavily than the tier list.
+Skip stack research when the stack is settled and the work adds no new platform, service, or dependency.

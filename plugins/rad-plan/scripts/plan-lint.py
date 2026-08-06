@@ -3,15 +3,12 @@
 plan-lint.py — Mechanical validation for docs/plan.md.
 
 Validates the single-file plan rad-plan emits against the structure in
-references/plan-template.md. Catches what an LLM eyeballing the plan can miss:
-missing required sections, tasks missing any of the six required fields,
-unresolved or cyclic task dependencies, and vague language in the fields that
-must be concrete.
+references/plan-template.md. It checks sections, the six task fields, outcome
+coverage, path labels, dependencies, concrete proof, and unsafe rollback forms.
 
-This is the v5.0 reshape. v4.x targeted docs/planning/current.md (an 8-section
-schema with acceptance-criteria checkboxes and an embedded session contract).
-v5.0 targets one plan.md whose tasks each carry: Objective, Files, Depends on,
-Done when, Validate, Rollback.
+The 7.1 contract targets one plan.md whose tasks each carry Objective, Files,
+Depends on, Done when, Validate, and Rollback. It also maps each observable
+outcome to its live tasks and final proof.
 
 Usage:
   python3 plan-lint.py docs/plan.md
@@ -36,9 +33,8 @@ import sys
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 
-# Required H2 sections per references/plan-template.md. "Stack" is conditional
-# (only when a stack evaluation ran), so it is recommended, not required.
-# "Shipped" (re-plan history) is optional and deliberately NOT linted — its task
+# Required H2 sections per references/plan-template.md. "Stack" is conditional.
+# "Shipped" (re-plan history) is optional and deliberately not linted. Its task
 # blocks live outside ## Tasks so history is never re-validated.
 REQUIRED_SECTIONS = (
     "Objective",
@@ -53,9 +49,8 @@ REQUIRED_SECTIONS = (
     "Stop conditions",
 )
 
-RECOMMENDED_SECTIONS = (
-    "Stack",
-)
+CONTRACT_MARKER = "<!-- rad-plan-contract: 7.1 -->"
+OUTCOME_SECTION = "Outcome coverage"
 
 # The six fields every task in ## Tasks must carry.
 REQUIRED_TASK_FIELDS = (
@@ -69,6 +64,16 @@ REQUIRED_TASK_FIELDS = (
 
 # Fields whose values must be concrete (no hand-waving).
 VAGUE_SCAN_FIELDS = ("Done when", "Validate")
+
+FILE_LABELS = ("[existing]", "[new]")
+
+UNSAFE_ROLLBACK_PHRASES = (
+    "git reset --hard",
+    "git checkout --",
+    "git restore",
+    "rm -rf",
+    "remove-item -recurse",
+)
 
 VAGUE_PHRASES = (
     "verify it works",
@@ -104,6 +109,7 @@ FIELD_BULLET = re.compile(
 )
 BULLET = re.compile(r"^\s*-\s+(?P<text>.+?)\s*$")
 TASK_REF = re.compile(r"\bT\d+(?:\.\d+)?\b")
+OUTCOME_ID = re.compile(r"^O\d+(?:\.\d+)?\b", re.IGNORECASE)
 
 
 @dataclass
@@ -137,6 +143,14 @@ class Task:
 
 
 @dataclass
+class Outcome:
+    outcome_id: str
+    line: int
+    covered_by: str
+    final_proof: str
+
+
+@dataclass
 class Issue:
     severity: str   # CRITICAL | HIGH | MEDIUM | LOW
     category: str   # sections | tasks | dependencies | vague
@@ -159,7 +173,7 @@ def parse_sections(text: str) -> dict[str, Section]:
         m = SECTION_HEADING.match(raw)
         if m:
             current = Section(name=m.group(1).strip(), line=lineno)
-            sections[current.name] = current
+            sections.setdefault(current.name, current)
             continue
         if raw.startswith("# ") and current is not None:
             current = None
@@ -167,6 +181,22 @@ def parse_sections(text: str) -> dict[str, Section]:
         if current is not None:
             current.body_lines.append(raw)
     return sections
+
+
+def find_duplicate_sections(text: str) -> list[tuple[str, int]]:
+    """Return repeated H2 section names and the line of each repeat."""
+    seen: set[str] = set()
+    duplicates: list[tuple[str, int]] = []
+    for lineno, raw in enumerate(text.splitlines(), start=1):
+        match = SECTION_HEADING.match(raw)
+        if not match:
+            continue
+        name = match.group(1).strip()
+        if name in seen:
+            duplicates.append((name, lineno))
+        else:
+            seen.add(name)
+    return duplicates
 
 
 def parse_tasks(section: Section) -> list[Task]:
@@ -190,10 +220,34 @@ def parse_tasks(section: Section) -> list[Task]:
     return tasks
 
 
+def parse_outcomes(section: Section) -> list[Outcome]:
+    """Parse data rows from the Outcome coverage Markdown table."""
+    outcomes: list[Outcome] = []
+    for index, raw in enumerate(section.body_lines):
+        stripped = raw.strip()
+        if not (stripped.startswith("|") and stripped.endswith("|")):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if len(cells) < 3:
+            continue
+        if cells[0].lower() == "outcome":
+            continue
+        if all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells[:3]):
+            continue
+        outcome_id = cells[0].split(" ", 1)[0].upper()
+        outcomes.append(Outcome(
+            outcome_id=outcome_id,
+            line=section.line + index + 1,
+            covered_by=cells[1],
+            final_proof=cells[2],
+        ))
+    return outcomes
+
+
 # ---------- checks ----------
 
 
-def check_sections(sections: dict[str, Section]) -> list[Issue]:
+def check_sections(sections: dict[str, Section], contract_71: bool) -> list[Issue]:
     issues: list[Issue] = []
     for req in REQUIRED_SECTIONS:
         if req not in sections:
@@ -208,14 +262,30 @@ def check_sections(sections: dict[str, Section]) -> list[Issue]:
                 f"Required section '## {req}' is empty or placeholder-only",
                 f"Populate '## {req}' with project-specific content",
             ))
-    for rec in RECOMMENDED_SECTIONS:
-        if rec not in sections and rec == "Stack":
-            issues.append(Issue(
-                "LOW", "sections", rec,
-                "No '## Stack' section — expected when a stack evaluation ran",
-                "Add '## Stack' if a stack decision was made; otherwise ignore",
-            ))
+    if OUTCOME_SECTION not in sections:
+        issues.append(Issue(
+            "HIGH" if contract_71 else "MEDIUM", "outcomes", OUTCOME_SECTION,
+            "Missing '## Outcome coverage' section",
+            "Map each observable outcome to at least one live task and one final proof",
+        ))
+    elif sections[OUTCOME_SECTION].is_empty:
+        issues.append(Issue(
+            "HIGH", "outcomes", OUTCOME_SECTION,
+            "The '## Outcome coverage' section is empty",
+            "Add at least one O1 row with a live task and final proof",
+        ))
     return issues
+
+
+def check_duplicate_sections(duplicates: list[tuple[str, int]]) -> list[Issue]:
+    return [
+        Issue(
+            "HIGH", "sections", name,
+            f"Duplicate section '## {name}' at line {line}",
+            "Keep one authoritative section with this heading",
+        )
+        for name, line in duplicates
+    ]
 
 
 def _scan_vague(text: str) -> str | None:
@@ -226,7 +296,7 @@ def _scan_vague(text: str) -> str | None:
     return None
 
 
-def check_tasks(tasks: list[Task], has_tasks_section: bool) -> list[Issue]:
+def check_tasks(tasks: list[Task], has_tasks_section: bool, contract_71: bool) -> list[Issue]:
     issues: list[Issue] = []
     if has_tasks_section and not tasks:
         issues.append(Issue(
@@ -273,6 +343,23 @@ def check_tasks(tasks: list[Task], has_tasks_section: bool) -> list[Issue]:
                     f"Task {task.task_id} field '{fld}' contains vague phrase: '{phrase}'",
                     "Replace with a concrete, verifiable command or condition",
                 ))
+
+        if contract_71:
+            files_value = task.fields.get("files", "")
+            for entry in [part.strip() for part in files_value.split(";") if part.strip()]:
+                if not entry.lower().startswith(FILE_LABELS):
+                    issues.append(Issue(
+                        "HIGH", "tasks", tag,
+                        f"Task {task.task_id} file entry lacks [existing] or [new]: '{entry}'",
+                        "Prefix each semicolon-separated Files entry with [existing] or [new]",
+                    ))
+
+    if len(tasks) > 20:
+        issues.append(Issue(
+            "MEDIUM", "tasks", "Tasks",
+            f"The live plan has {len(tasks)} tasks; the review threshold is 20",
+            "Reduce the current release or split it into a smaller plan",
+        ))
     return issues
 
 
@@ -285,8 +372,12 @@ def check_dependencies(tasks: list[Task]) -> list[Issue]:
     for task in tasks:
         raw = task.fields.get("depends on", "")
         refs = TASK_REF.findall(raw)
-        # "none" with no refs is valid; refs alongside "none" is contradictory but
-        # we just honor the refs.
+        if refs and re.search(r"\bnone\b", raw, re.IGNORECASE):
+            issues.append(Issue(
+                "HIGH", "dependencies", task.task_id,
+                f"Task {task.task_id} says 'none' and also names a dependency",
+                "Use 'none' or live task IDs, not both",
+            ))
         deps: list[str] = []
         for ref in refs:
             if ref == task.task_id:
@@ -337,13 +428,92 @@ def check_dependencies(tasks: list[Task]) -> list[Issue]:
     return issues
 
 
+def check_outcomes(outcomes: list[Outcome], tasks: list[Task], has_section: bool) -> list[Issue]:
+    issues: list[Issue] = []
+    if not has_section:
+        return issues
+    if not outcomes:
+        return [Issue(
+            "HIGH", "outcomes", OUTCOME_SECTION,
+            "The Outcome coverage table has no parseable rows",
+            "Add rows such as '| O1 - outcome | T1 | `focused check` |'",
+        )]
+
+    task_ids = {task.task_id for task in tasks}
+    seen: set[str] = set()
+    for outcome in outcomes:
+        if not OUTCOME_ID.match(outcome.outcome_id):
+            issues.append(Issue(
+                "HIGH", "outcomes", outcome.outcome_id,
+                f"Outcome row at line {outcome.line} lacks an O-number ID",
+                "Start the Outcome cell with O1, O2, and so on",
+            ))
+            continue
+        if outcome.outcome_id in seen:
+            issues.append(Issue(
+                "HIGH", "outcomes", outcome.outcome_id,
+                f"Duplicate outcome ID '{outcome.outcome_id}'",
+                "Give each outcome a unique O-number ID",
+            ))
+        seen.add(outcome.outcome_id)
+
+        refs = TASK_REF.findall(outcome.covered_by)
+        if not refs:
+            issues.append(Issue(
+                "HIGH", "outcomes", outcome.outcome_id,
+                f"Outcome {outcome.outcome_id} has no live task reference",
+                "Add at least one task ID in the Covered by column",
+            ))
+        for ref in refs:
+            if ref not in task_ids:
+                issues.append(Issue(
+                    "HIGH", "outcomes", outcome.outcome_id,
+                    f"Outcome {outcome.outcome_id} references undefined task '{ref}'",
+                    "Reference a live task from the Tasks section",
+                ))
+
+        proof = outcome.final_proof.strip().strip("`")
+        if not proof or proof.lower() in ("tbd", "...", "[focused final check]"):
+            issues.append(Issue(
+                "HIGH", "outcomes", outcome.outcome_id,
+                f"Outcome {outcome.outcome_id} has no concrete final proof",
+                "Name a focused final command or exact review condition",
+            ))
+        else:
+            phrase = _scan_vague(proof)
+            if phrase:
+                issues.append(Issue(
+                    "HIGH", "outcomes", outcome.outcome_id,
+                    f"Outcome {outcome.outcome_id} proof contains vague phrase: '{phrase}'",
+                    "Replace it with a concrete command or observable condition",
+                ))
+    return issues
+
+
+def check_unsafe_rollbacks(text: str) -> list[Issue]:
+    issues: list[Issue] = []
+    for lineno, raw in enumerate(text.splitlines(), start=1):
+        if "**rollback:**" not in raw.lower():
+            continue
+        lower = raw.lower()
+        for phrase in UNSAFE_ROLLBACK_PHRASES:
+            if phrase in lower:
+                issues.append(Issue(
+                    "HIGH", "safety", "Rollback",
+                    f"Unsafe rollback command form '{phrase}' at line {lineno}",
+                    "Describe a safe recovery strategy without a destructive Git or recursive-delete command",
+                ))
+    return issues
+
+
 # ---------- output ----------
 
 
 def render_text(report: dict) -> str:
     lines = [
         f"plan-lint: file={report['file']}",
-        f"sections parsed: {report['section_count']}  tasks parsed: {report['task_count']}",
+        f"contract: {report['contract_version']}  sections: {report['section_count']}  "
+        f"tasks: {report['task_count']}  outcomes: {report['outcome_count']}",
     ]
     issues = report["issues"]
     if not issues:
@@ -385,18 +555,26 @@ def main(argv: list[str]) -> int:
         return 2
 
     sections = parse_sections(text)
+    duplicates = find_duplicate_sections(text)
     tasks = parse_tasks(sections["Tasks"]) if "Tasks" in sections else []
+    outcomes = parse_outcomes(sections[OUTCOME_SECTION]) if OUTCOME_SECTION in sections else []
+    contract_71 = CONTRACT_MARKER in text
 
     issues: list[Issue] = []
-    issues.extend(check_sections(sections))
-    issues.extend(check_tasks(tasks, "Tasks" in sections))
+    issues.extend(check_sections(sections, contract_71))
+    issues.extend(check_duplicate_sections(duplicates))
+    issues.extend(check_tasks(tasks, "Tasks" in sections, contract_71))
     issues.extend(check_dependencies(tasks))
+    issues.extend(check_outcomes(outcomes, tasks, OUTCOME_SECTION in sections))
+    issues.extend(check_unsafe_rollbacks(text))
 
     report = {
         "file": str(file_path),
+        "contract_version": "7.1" if contract_71 else "legacy",
         "section_count": len(sections),
         "section_names": list(sections.keys()),
         "task_count": len(tasks),
+        "outcome_count": len(outcomes),
         "issues": [i.to_dict() for i in issues],
     }
 

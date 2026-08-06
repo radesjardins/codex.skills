@@ -1,170 +1,143 @@
-# Plan Output Template — single-file `plan.md`
+# Plan Contract 7.1
 
-rad-plan emits **one** plan file: `docs/plan.md` (created if absent; updated in place if a plan already exists there or at a detected legacy path). Everything the planning conversation produces — objective, end goal, release map, scope, assumptions, stack, milestones, tasks, checkpoints, risks — folds into this one file as sections. No separate `tasks.md`, no strategic-doc tree. It is written for two readers at once: the plain-language layer (How-to-read note, Release map, *After this ships* lines) for the human; the six-field task blocks for the coding agent.
+This file is the authority for the RAD Plan output. New plans use one maintained file: `docs/plan.md`. A detected legacy plan can stay at its current path.
 
-A second file, `docs/[date]-update-prompt.md`, is written **only when** the conversation surfaces a change that belongs in a durable doc the planner does not own (an existing PRD, `docs/design.md`). Settled decisions and parked ideas do not go through the update-prompt — the seed packet appends them to `docs/decisions.md` / `docs/ideas.md` directly (see the plan skill, step 6). See "Update-prompt template" below.
+RAD Plan may create a missing PRD from confirmed interview answers. It may append confirmed choices or ideas to existing `docs/decisions.md` and `docs/ideas.md`. It does not create those shelf files, architecture or API documents, or a temporary update-prompt. Other durable changes go in `## Durable follow-ups` inside the plan.
 
-**Vocabulary (the naming ladder).** The repo's AGENTS.md doc-model block is authoritative when present; these defaults match it. The only tracked units of work are **Goal** (1 per project, lives in prd.md), **Release** (Now / Next / Later horizons, prd.md + plan.md), **Milestone** (M1…, plan.md), and **Task** (T1…, plan.md). plan.md speaks only Milestone/Task (plus the shared Release map); the PRD speaks only Goal/Release. Never use phase, slice, sprint, epic, stage, or "step" as a tracked unit in either file.
+## Vocabulary
 
-`plan.md` is validated mechanically by `scripts/plan-lint.py` after every write.
+- **Goal:** one product end state, stored in the PRD.
+- **Release:** Now, Next, or Later.
+- **Milestone:** a shippable part of Now.
+- **Task:** one bounded work item.
 
----
+Use Goal and Release in the PRD. Use Milestone and Task in the plan. A repository `AGENTS.md` document model can replace these defaults.
 
-## `plan.md` template
+## Plan template
 
 ```markdown
 # Plan: [Project Name]
 
 **Status:** [DRAFT | APPROVED | IN PROGRESS | COMPLETED]
 **Updated:** [YYYY-MM-DD]
-<!-- Add the next line ONLY when an update-prompt was written this session: -->
-**Pending durable-doc updates:** see `[YYYY-MM-DD]-update-prompt.md`
+<!-- rad-plan-contract: 7.1 -->
 
-> **How to read this plan:** the Release map says where this effort fits on the road
-> to the end goal. Milestones are the chunks of work, each with an *After this ships*
-> line saying what you can do once it lands. The task blocks underneath are precise
-> instructions for the coding agent — you don't need to parse every field. Stop
-> conditions are where the agent must halt and ask you instead of guessing.
+> **How to read this plan:** The Release map shows where this work fits. Milestones
+> are shippable parts of Now. Each task gives a coding agent the exact outcome,
+> files, dependencies, proof, and recovery need. Stop conditions require owner input.
 
 ## Objective
 
-[1–2 sentences: what this builds and why now. The "why now" separates a real
-project from a someday-maybe.]
+[What this builds and why it matters now.]
 
-**End goal:** [One sentence — the truly-done state from Discovery, beyond this
-plan's MVP. Anchors the Release map's "Later".]
+**End goal:** [The confirmed product end state.]
 
 ## Release map
 
-[Detail decays with distance — by design. Only "Now" gets milestones and tasks
-below; speccing distant versions in task detail is fake precision. Pulling "Next"
-into detail is a rad-plan:replan event when "Now" ships.]
-
-- **Now — [MVP/Beta name] (this plan):** [one sentence — what ships and for whom]
-- **Next — V1:** [milestone-level outline, 3–6 bullets; no task specs]
-  - [outline bullet]
-- **Later — the end goal:** [theme bullets anchored to the End goal line]
-  - [theme bullet]
+- **Now - [name] (this plan):** [Current release outcome]
+- **Next - [name]:** [Three to six outline bullets, no task blocks]
+  - [Outline]
+- **Later - the end goal:** [Theme bullets]
+  - [Theme]
 
 ## Scope
 
 **In scope:**
-- [Capability the plan commits to]
+- [Committed capability]
 
 **Out of scope / non-goals:**
-- [Deliberate exclusion — not just unattended, explicitly NOT building this]
+- [Deliberate exclusion]
 
 ## Key assumptions
 
-[Non-obvious truths about the project's reality that wouldn't be evident from the
-code. One-line entries. When an assumption invalidates, strike it through rather
-than deleting — the audit trail matters.]
-
-- [YYYY-MM-DD] [e.g. "No real users yet — backward-compat can break until M3."]
+- [YYYY-MM-DD] [Confirmed assumption]
 
 ## Stack
 
-[Only when a stack evaluation ran this session. Brief — language, framework, data
-store, key libraries. The full rationale is durable; if it warrants recording,
-surface it into the update-prompt, do not expand it here.]
+[Include only when a stack decision ran. State the choice and short reason.]
+
+## Outcome coverage
+
+| Outcome | Covered by | Final proof |
+|---|---|---|
+| O1 - [Observable user or system outcome] | T1, T2 | `[Focused final check]` |
 
 ## Milestones
 
 | # | Milestone | Ships | Key artifacts |
 |---|---|---|---|
-| M1 | [theme] | [coherent shippable outcome] | [files / components] |
-
-[Risk-first ordering: the hardest unknown is solved first. Size discipline:
-aim for 2–3 tasks per milestone; a milestone over 5 tasks is a split candidate.]
+| M1 | [Theme] | [Shippable result] | [Files or components] |
 
 ## Tasks
 
-### M1 — [theme]
+### M1 - [Theme]
 
-*After this ships: [plain English — what the user can do or see once M1 lands.]*
+*After this ships: [What the user can do or see.]*
 
-- **T1 — [title]**
-  - **Objective:** [1–2 sentences]
-  - **Files:** [files likely created / modified]
-  - **Depends on:** [none | T-x, T-y]
-  - **Done when:** [specific, measurable — not "works"]
-  - **Validate:** `[runnable command or verifiable condition]`
-  - **Rollback:** `[how to revert to last known-good]`
-
-[Repeat per task. Every task carries all six fields — plan-lint enforces it.]
+- **T1 - [title]**
+  - **Objective:** [One clear outcome]
+  - **Files:** [existing] `path/to/current.file`; [new] `path/to/new.file`
+  - **Depends on:** [none | T2, T3]
+  - **Done when:** [Observable and measurable result]
+  - **Validate:** `[Focused command or exact review condition]`
+  - **Rollback:** [Safe recovery strategy. Name manual recovery when no safe automatic path exists.]
 
 ## Checkpoints
 
 ### After M1
 
-- **Gate:** T1–Tn complete and validated
-- **Validate:** `[command that proves the milestone]`
-- **Rollback:** `[reset to pre-M1 known-good]`
+- **Gate:** [Tasks and owner checks complete]
+- **Validate:** `[Milestone check]`
+- **Rollback:** [Safe milestone recovery strategy]
 
 ## Risks & mitigations
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| [risk] | [Low/Med/High] | [Low/Med/High] | [specific mitigation] |
+| [Risk] | [Low/Med/High] | [Low/Med/High] | [Action] |
 
 ## Validation
 
-[The commands that prove the whole plan is done. Concrete, pass/fail.]
+- `[Final command]` - [Expected result]
 
 ## Stop conditions
 
-[When the executing agent must halt and ask rather than guess — e.g. requirement
-conflict, change touches auth/billing/data model, validation fails and the fix
-needs scope expansion.]
+- [Condition that requires owner input]
+
+## Durable follow-ups
+
+- [Target document and confirmed change, or omit this section when none exist]
 ```
 
----
+## Enforced rules
 
-## Shared rules (enforced)
+1. New plans include `<!-- rad-plan-contract: 7.1 -->`.
+2. Every live task has the six fields shown above.
+3. Each Files entry starts with `[existing]` or `[new]` and entries use semicolons.
+4. Existing paths are checked during the bounded implementation-surface read. New paths are marked `[new]`.
+5. Every Outcome coverage row names at least one live task and one final proof.
+6. Task dependencies resolve and contain no cycles.
+7. Done when and Validate use concrete checks.
+8. Rollback follows `failure-state-template.md` and contains no destructive Git or recursive-delete command.
+9. A checkpoint follows every milestone.
+10. Only Now has task detail.
+11. A milestone over five tasks and a live plan over 20 tasks require a split warning and owner review.
+12. Shipped work moves to `## Shipped` and remains outside `## Tasks`.
+13. An invalidated assumption is struck through and kept.
 
-Every task in `## Tasks` MUST carry all six fields: **Objective, Files, Depends on, Done when, Validate, Rollback**. `plan-lint.py` flags any task missing one.
+## Durable follow-ups
 
-1. **Dependencies reference task IDs** (`T1`, `T2`) and must resolve to a task that exists in the file — no phantom dependencies, no cycles. Checked by `plan-lint.py`.
-2. **`Validate` and `Done when` must be runnable or verifiable** — vague language ("verify it works", "looks right", "tbd", "etc.") is flagged.
-3. **`Rollback` must restore a known-good state.** Judgment — `risk-assessor` checks quality.
-4. **A checkpoint follows every milestone**, with its own gate / validate / rollback (the failure-state triple from `references/failure-state-template.md`). Placement judged by `risk-assessor`.
-5. **Assumption invalidations use strikethrough**, never deletion.
-6. **Task-level detail exists only for the "Now" horizon.** "Next" stays a milestone outline; "Later" stays themes. `rad-plan:replan` pulls the next horizon into detail when "Now" ships.
-7. **Shipped work is preserved, never deleted.** At re-plan, shipped task blocks move to a `## Shipped` section (outside `## Tasks`, so the linter doesn't re-validate history). Remaining tasks that depended on a shipped task get `Depends on: none — predecessor shipped` (do not keep the old task ID in the field; the linter would read it as a phantom dependency).
+Use this optional section when planning changes an existing PRD, design, architecture, API contract, or repository instruction that RAD Plan does not own.
 
-| Rule | Enforced by |
-|---|---|
-| Required sections present (incl. Release map) | `plan-lint.py` |
-| Per-task field presence | `plan-lint.py` |
-| Dependency resolution + no cycles | `plan-lint.py` |
-| Vague-language detection | `plan-lint.py` |
-| Rollback correctness, checkpoint placement, anti-pattern coverage | `risk-assessor` agent (judgment) |
-| Horizon detail-decay, shipped-history preservation | skill procedure (`plan` / `replan`) |
+Each line names:
 
----
+- the target file;
+- the confirmed change;
+- why it changed;
+- the skill or owner who should apply it, when known and available.
 
-## Update-prompt template
+If `docs/decisions.md` or `docs/ideas.md` already exists, RAD Plan can append confirmed entries there after approval. If either file is absent, keep the entry in this section. Do not create a shelf file.
 
-Written to `docs/[date]-update-prompt.md` **only** when the conversation surfaced a durable-doc change. `plan.md` gets a one-line `**Pending durable-doc updates:**` pointer (above). One source of truth: the surfaced items live here, not duplicated into `plan.md`.
+## Compatibility
 
-```markdown
-# [YYYY-MM-DD] — Doc update prompt
-
-Generated by rad-plan. Paste into Codex to reconcile durable docs
-with decisions made during this planning session. Delete once the updates land.
-
----
-
-During planning on [YYYY-MM-DD] we made changes that affect durable docs the
-planner does not own. Please:
-
-1. **[path, e.g. docs/prd.md]** — [what to record, and why; mark any superseded
-   wording].
-2. **[path, e.g. docs/design.md]** — [settled visual/design change to capture].
-3. **[path, e.g. docs/architecture.md]** — [structural implication to capture in
-   an architecture doc that already exists].
-
-After updating, confirm each file changed and delete this prompt.
-```
-
-**Agent-agnostic.** The prompt names files and changes in plain language, so Codex or another coding agent can run it. The planner never writes these durable docs itself; it only writes this prompt and the `plan.md` pointer.
+Plans without the 7.1 marker are legacy plans. The linter checks their current structure and reports the missing Outcome coverage section as advisory. It enforces Outcome coverage and file labels for 7.1 plans.

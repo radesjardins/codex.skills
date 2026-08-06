@@ -1,110 +1,62 @@
-# Failure State Mapping: Triple-Component Instructions
+# Safe Recovery and Failure States
 
-AI models suffer from "happy path" bias -- they assume every tool call, API response, and environment configuration will succeed perfectly. The planner must counter this by defining explicit failure states for every task and milestone. In `plan.md` these map onto each task's **Validate** (the check) and **Rollback** (the reversal), the plan-level **Stop conditions** (when to escalate rather than push on), and the per-milestone **Checkpoints** (gate / validate / rollback boundaries).
+A plan must explain how to detect failure and return the changed system to a known state. Recovery instructions must protect unrelated user work.
 
-## The Triple-Component Model
+## Task contract
 
-Every milestone or risky change requires three components:
+Each task uses the six fields in `plan-template.md`. Failure handling lives in three of them:
 
-### 1. Execution Action
-The precise technical operation to be performed.
-- Must be specific enough that an agent can execute it without interpretation
-- Include the exact command, file path, or API call
-- Specify expected inputs and outputs
+- **Done when:** the observable result.
+- **Validate:** the focused pass or fail check.
+- **Rollback:** the safe recovery strategy.
 
-### 2. Validation Check
-A deterministic test or status probe confirming success.
-- Must be automatable (runnable command, not "looks right")
-- Must produce a clear pass/fail signal
-- Should check both the positive case AND key negative cases
-- Include expected output or exit code
+Use `## Stop conditions` for failures that need owner input instead of automatic recovery. Use milestone checkpoints for release-level gates.
 
-### 3. Rollback Procedure
-Pre-determined reversal steps to revert to the last stable state.
-- Must be tested before the execution action runs
-- Should restore the system to the exact pre-execution state
-- Include data recovery steps if destructive operations are involved
-- Specify what constitutes a "clean rollback" vs. "partial recovery"
+## Safe rollback rules
 
-## Template (per milestone or risky change)
+1. Name the state that must be restored: code, data, configuration, deployment, or external service state.
+2. Prefer a new revert commit when the task has its own commit.
+3. For data changes, name the tested down migration, backup restore, or approved forward fix.
+4. For external systems, name the compensating action and the evidence that confirms it worked.
+5. Use `manual recovery required` when no safe automatic rollback exists.
+6. Stop if unrelated local changes, an unknown base commit, a missing backup, or a locked resource makes recovery unsafe.
+
+Never put these commands in a generated rollback instruction:
+
+- `git reset --hard`
+- `git checkout --`
+- `git restore`
+- recursive delete commands
+
+Those commands can erase work outside the task. A plan can describe the intended state without prescribing a destructive command.
+
+## Example
 
 ```markdown
-#### Example: user authentication middleware
-
-**Execution Action:**
-Create JWT validation middleware in `src/middleware/auth.ts` that:
-- Extracts Bearer token from Authorization header
-- Validates token signature against `JWT_SECRET`
-- Attaches decoded user payload to request context
-- Returns 401 for missing/invalid tokens
-
-**Validation Check:**
-```bash
-# Run auth middleware tests
-npm test -- --grep "auth middleware"
-
-# Expected: All tests pass
-# - Valid token: request proceeds, user attached to context
-# - Missing token: returns 401 with error message
-# - Expired token: returns 401 with "token expired" message
-# - Malformed token: returns 401, does not crash server
+- **T3 - Add the account migration**
+  - **Objective:** Add the nullable account status column and backfill current rows.
+  - **Files:** [existing] `db/schema.sql`; [new] `db/migrations/014-account-status.sql`; [new] `db/migrations/014-account-status.down.sql`
+  - **Depends on:** T2
+  - **Done when:** Existing accounts have a valid status and new accounts receive the default status.
+  - **Validate:** Run the migration against a disposable database, run the account migration tests, then run the down migration and confirm the original schema and row count.
+  - **Rollback:** Use the tested down migration before production data is accepted. After production data is accepted, stop for owner approval and use the documented backup or forward-fix procedure.
 ```
 
-**Rollback Procedure:**
-```bash
-# Remove the middleware file
-git checkout -- src/middleware/auth.ts
+## Failures that need stop conditions
 
-# Revert route registrations that depend on it
-git checkout -- src/routes/index.ts
+Add a stop condition when the task can affect:
 
-# Verify server starts without auth middleware
-npm run dev
-```
+- authentication or authorization;
+- payments;
+- personal or regulated data;
+- destructive schema changes;
+- an external service with no safe compensating action;
+- a production deployment that cannot be restored from a known artifact.
 
-**User Checkpoint:** Review middleware logic before integrating into routes. Verify token validation matches your auth provider's signing algorithm.
-```
+## Review questions
 
-## Failure State Categories
-
-### Environment Failures
-- Missing environment variables
-- Incorrect database connection strings
-- Port conflicts
-- Missing system dependencies
-
-### Data Failures
-- Schema migration failures (column conflicts, data loss)
-- Seed data incompatible with schema changes
-- Foreign key constraint violations
-- Data type mismatches
-
-### Integration Failures
-- API endpoint not responding
-- Authentication token expired or invalid
-- Rate limiting triggered
-- Network timeout
-
-### Logic Failures
-- Test assertions failing (implementation doesn't match spec)
-- Edge cases not handled (null inputs, empty arrays, boundary values)
-- Race conditions in async operations
-- State management inconsistencies
-
-## Checkpoint Frequency
-
-Insert validation checkpoints:
-- After every milestone completion
-- After any change that modifies database schema
-- After any change to authentication / authorization
-- After any change that integrates with external services
-- Before any destructive or irreversible operation
-
-## Escalation Protocol
-
-If a validation check fails:
-1. **First attempt:** Review error output, identify root cause, fix and re-validate
-2. **Second attempt:** If same failure, check anti-patterns list -- the approach may be fundamentally wrong
-3. **Third attempt:** STOP. Do not retry. Execute rollback procedure. Surface the failure to the user via the milestone's stop conditions, with a clear description of what failed and why. Escalate to human review.
-
-Never enter an endless correction loop. After 2 failures on the same task, the context is likely polluted. Clear and restart with a fresh approach.
+- Does Validate test the stated outcome?
+- Does Rollback restore the real state, including data and external effects?
+- Can the recovery touch unrelated local work?
+- Is the required backup or prior artifact known to exist?
+- Does the plan stop when recovery needs an owner decision?

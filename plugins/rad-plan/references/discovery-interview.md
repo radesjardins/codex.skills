@@ -70,17 +70,21 @@ assumptions**.
 
 Two gates, in order, before any planning begins:
 
-**1. The speed fork (user's choice, not a heuristic).** Ask directly:
+**1. The speed fork (user's choice).** Give a recommendation, then ask directly:
 
-> **Quick plan** — this is a single feature or small project; skip the stack
-> evaluation agent, single risk pass. Faster, still lint-validated.
-> **Full plan** — new project or significant build; full stack evaluation and
-> iterative adversarial review.
+> **Quick plan:** one evidence pass, one batch of no more than five questions,
+> one mirror, one assumption confirmation, no stack review unless a new choice
+> exists, and one risk pass. Write only the plan by default.
+> **Full plan:** up to three discovery rounds, optional stack review when a real
+> choice exists, and one first risk pass that repeats only after REVISE.
 
-Default recommendation: full for greenfield projects, quick for a feature in an
-established codebase. The user decides.
+Recommend quick for a known change in one system with no new service, deployment,
+auth, payment, personal-data, or schema risk. Recommend full for a new product,
+unclear architecture, cross-system work, migration, auth, payment, personal data,
+or a new deployment target. The user decides.
 
-**2. The PRD gap check.** If `docs/prd.md` is missing, a skeleton, or contradicts
+**2. The PRD gap check.** Run this on the full path, or on the quick path only when
+the owner asks. If `docs/prd.md` is missing, a skeleton, or contradicts
 what the interview established: offer to draft it — *"You've just told me everything
 a PRD needs. Want me to write it up? You'll confirm each section."* On yes, draft each
 PRD section (Goal, Users & primary workflow, Releases — Now / Next / Later, Non-goals,

@@ -1,127 +1,108 @@
 ---
 name: rescue
 description: >
-  Use when the user says "rescue this project", "this repo
-  is a mess", "help me out of this", "I don't know where this project stands",
-  "get this back on track", "untangle this project", "I abandoned this and want
-  to restart", "figure out what state this is in", or has an existing project
-  with unclear status, missing or garbage docs, and no trustworthy plan. Runs
-  project archaeology (evidence-based state assessment from code + git, no code
-  changes), reconstructs intent through the discovery interview, hands structure
-  work to rad-repo's adopt, drafts a PRD from the answers if none exists, and
-  produces a fresh release-map plan from wherever the project actually is. It
-  assesses and plans — it never fixes, runs, or deletes code.
+  Use when an existing project has unclear status, missing or stale documents,
+  abandoned work, or uncertain intent: rescue this project, get it back on track,
+  untangle it, or determine where it stands. Performs read-only project archaeology,
+  asks evidence-led keep/cut/unknown questions, can draft a missing PRD from approved
+  answers, and creates a checked release-map plan. It never fixes or runs application code.
 ---
 
-# Rescue — from "this repo is a mess" to an approved plan
+# Rescue
 
-**Codex path rule:** Resolve the plugin root as the directory two levels above this
-`SKILL.md`. Every `references/` and `scripts/` path below is relative to that root;
-convert it to an absolute path before running a script.
+Recover project intent from repository evidence, then create an approved plan from the state that exists now.
 
-The second door into planning. `plan` is for greenfield or a clear next effort;
-`rescue` is for a project whose state, docs, or direction got away from its owner.
-The output is the same thing `plan` produces — a release-map `docs/plan.md` (and
-usually a PRD) — but it starts from evidence, not a blank page.
+Do not modify, run, build, test, delete, or clean up application code. Needed repairs become plan tasks.
 
-**CRITICAL: Rescue assesses and plans. It does NOT fix.** No source edits, no
-running the project's code or tests, no deleting anything, no "while I'm here"
-corrections. Stabilization work the project needs becomes *tasks in the plan*, not
-actions taken now. Files written: `docs/plan.md`, conditionally `docs/prd.md`
-(per-section confirmation, only when missing/skeletal), conditionally
-`docs/[date]-update-prompt.md`.
+## Resolve paths and write boundary
 
-## 1. Archaeology — what's actually here (read-only)
+Resolve the plugin root as the directory two levels above this `SKILL.md`. Read `references/discovery-interview.md` and `references/plan-template.md`.
 
-Build the evidence before asking the user anything. In parallel batches:
+Allowed writes:
 
-- **Shape:** Glob the tree; read the manifest(s), top-level config, entry points.
-- **History:** `git log --oneline -30`, `git log -1 --format=%cI` (last activity),
-  `git status --short` (work left uncommitted mid-flight is a strong signal of where
-  it stopped).
-- **Surviving docs:** any README, `docs/**/*.md`, `AGENTS.md`, TODO/FIXME
-  scan (`Grep` for `TODO|FIXME|HACK|XXX`).
-- **Half-built signals:** routes/components/exports that nothing references, test
-  files with no implementation (or the reverse), config for services that never
-  appear in code.
+- the detected plan path or new `docs/plan.md`;
+- a missing or skeletal `docs/prd.md`, only from confirmed answers and after section approval;
+- append-only entries in existing decisions or ideas files after owner approval.
 
-Compose the **State of the project** report — plain language, evidence-cited,
-honestly hedged (this is *inference from reading*, not tested truth — nothing was run):
+Put other confirmed document changes in `## Durable follow-ups`. Do not create architecture, API, decisions, ideas, status, roadmap, or update-prompt files.
+
+## Companion-skill rule
+
+Name a RAD Repo or RAD Brainstorm skill only when current evidence needs the exact workflow, the exact skill appears in the current available-skill list, and it would add clear value. Report the need in plain language when absent. Never invoke a suggested companion unless the owner asks or accepts.
+
+If repository structure is also unclear, explain the structure problem. Suggest `rad-repo:adopt` only under this rule. Continue with built-in defaults when it is absent or declined.
+
+## 1. Build the state report
+
+Read in bounded batches:
+
+- manifests, top-level config, entry points, and directory shape;
+- the latest 30 commits, last activity date, and current worktree status;
+- README, `AGENTS.md`, and current Markdown documents;
+- TODO, FIXME, HACK, and XXX markers;
+- likely half-built routes, exports, components, tests, and configuration.
+
+Do not run the project. Label every conclusion as evidence, inference, or unknown.
+
+Present:
 
 ```text
 State of the project:
-What this appears to be:   <best inference of the goal, from code + docs>
-Looks complete:            <pieces with implementation + tests/usage>
-Half-built:                <pieces started but not wired up — say what's missing>
-Ambiguous:                 <can't tell without running it — say so plainly>
-Last activity:             <date, and what the final commits were doing>
-Docs situation:            <missing / stale / contradictory — one line>
+Likely goal: <evidence-backed inference>
+Looks complete: <artifacts and evidence>
+Half-built: <artifacts and missing link>
+Unknown without running: <items>
+Last activity: <date and final work>
+Document state: <missing, stale, or conflicting>
 ```
 
-## 2. Intent interview — evidence-led grilling
+## 2. Recover intent
 
-Run the discovery interview (`references/discovery-interview.md` — load it), with the
-rescue twist: **lead every question with the evidence.** "The code suggests you were
-building X and got partway into login — is X still what you want? Is login still the
-approach?" beats asking a frustrated person to summarize their own mess from memory.
+Use the discovery interview with an evidence-led form. Start questions with what the repository suggests.
 
-Add the rescue-specific area: **keep / cut / unknown** for each major piece found in
-archaeology. Salvage decisions belong to the user — never assume half-built work is
-worth finishing, and never assume it isn't. Capture cuts as deliberate exclusions.
+For each major existing part, ask the owner to choose:
 
-Close with the same two gates as `plan` (speed fork; PRD gap check — in a rescue the
-PRD is almost always missing or stale, so expect to draft it from the answers,
-per-section confirmed).
+- keep;
+- cut;
+- unknown.
 
-## 3. Structure handoff — don't duplicate rad-repo
+Use quick or full depth under the `plan` skill rules. Quick uses one batch of no more than five unresolved questions. Full uses up to three rounds. Mirror the project back and propose assumptions for confirmation.
 
-Rescue runs **after** `rad-repo:adopt` when the repo's structure is the
-mess: **adopt is structure archaeology** (the container — AGENTS.md, doc triage,
-the shelf), **rescue is intent archaeology** (the contents — what the project was
-trying to be and what the plan should say now). If the repo lacks the doc model or
-its docs are a mess, pause and say so: recommend `rad-repo:adopt`
-(existing/drifted repo) or `rad-repo:repo-init` (nothing there yet) — run
-it if the user agrees and it's installed, then resume here. If it isn't installed
-or the user prefers to skip, proceed anyway; rescue only *requires* a `docs/`
-folder to write into. Rescue never files, archives, or restructures docs itself —
-that's the repo-manager's job.
+For full rescue, offer to draft a missing or skeletal PRD from confirmed answers. For quick rescue, draft it only when the owner asks.
 
-## 4. Plan from where the project actually is
+## 3. Check the implementation surface
 
-Build the plan per `plan`'s build discipline (step 3: goal-backward, risk-first,
-six-field tasks, release map — the repo's AGENTS.md doc-model block is authoritative
-when present), with the rescue-specific anchor:
+After scope is settled, inspect the entry point, affected modules, nearest tests, and relevant config. Use a budget of 12 files for quick and 30 for full. Mark plan paths `[existing]` or `[new]`. Keep uncertain paths inside a bounded discovery task.
 
-- **"Now" starts from reality, not zero.** The first milestone is typically
-  *stabilize and verify*: tasks that get the project to a known-good state (e.g.
-  "T1 — get the build running and record the command", "T2 — write the one smoke
-  test that proves the core workflow"). Verification the rescue couldn't do
-  read-only becomes the plan's first validated tasks.
-- Half-built pieces the user kept become explicit tasks with honest Done-when; cut
-  pieces land in Scope non-goals with the strike decision recorded.
-- The Release map's "Later" is the end goal the interview established — the thing
-  the user was trying to accomplish all along.
+## 4. Plan from current reality
 
-Then the standard close: lint (`python3`, or `python` on Windows) →
-`plan-lint.py` → fix CRITICAL/HIGH → risk pass per the chosen speed fork → present
-per `plan`'s review shape (plain summary, release map, decisions, then detail) → user
-approval → `APPROVED`, stamp, update-prompt if anything durable surfaced.
+Build the plan with the contract in `references/plan-template.md`:
 
-## What this skill does NOT do
+1. Start Now from the current project state.
+2. Make the first milestone stabilize and verify when current behavior is unknown.
+3. Put kept half-built parts into exact tasks.
+4. Put cuts in non-goals and preserve the owner decision.
+5. Map every live outcome to tasks and final proof in `## Outcome coverage`.
+6. Use two or three tasks per milestone when practical.
+7. Warn above five tasks in a milestone or 20 live tasks in the plan.
+8. Use safe recovery rules and focused validation.
+9. Set Status to DRAFT and include the 7.1 contract marker.
 
-- Does not modify, run, build, test, delete, or "clean up" any code — assessment is
-  read-only; fixes become plan tasks.
-- Does not file, archive, or restructure docs — it recommends the repo-manager and
-  resumes.
-- Does not decide what to salvage — keep/cut is the user's call, asked explicitly.
-- Does not present inference as fact — anything unverified is labeled ambiguous and
-  becomes an early verification task.
-- Does not edit an existing real PRD — only births one from the interview when
-  missing/skeletal, per-section confirmed.
+## 5. Check and approve
 
-## Key references
+Run `plan-lint.py` against the detected plan path. Fix CRITICAL and HIGH findings.
 
-- `references/discovery-interview.md` — the interview protocol + both closing gates
-- `references/plan-template.md` — output structure, release map, enforced rules
-- `references/subagent-prompts/risk-assessment.md` — risk-pass dispatch
-- `scripts/plan-lint.py` — mechanical validation
+Run the risk process for the chosen depth:
+
+- Quick: one pass, then surface unresolved blocking issues.
+- Full: one first pass, then repeat only after REVISE and plan changes, with three total passes maximum.
+- RETHINK: stop for the owner. Suggest an exact `rad-brainstorm:*` skill only under the companion-skill rule.
+
+Present the state report, release map, outcome coverage, decisions, milestones, tasks, and check results. Keep the plan DRAFT until owner approval. After approval, set it to APPROVED, append only to existing shelf files, and run the linter once on the final plan.
+
+## Boundaries
+
+- Treat inference as inference.
+- Let the owner decide what to salvage.
+- Keep source changes and project execution outside rescue.
+- Do not invoke companion skills without owner acceptance.

@@ -1,149 +1,146 @@
 # Plan: URL Shortener Service
 
 **Status:** APPROVED
-**Updated:** 2026-06-06
-**Pending durable-doc updates:** see `2026-06-06-update-prompt.md`
+**Updated:** 2026-08-06
+<!-- rad-plan-contract: 7.1 -->
 
-> **How to read this plan:** the Release map says where this effort fits on the road
-> to the end goal. Milestones are the chunks of work, each with an *After this ships*
-> line saying what you can do once it lands. The task blocks underneath are precise
-> instructions for the coding agent — you don't need to parse every field. Stop
-> conditions are where the agent must halt and ask instead of guessing.
+> **How to read this plan:** The Release map shows where this work fits. Milestones
+> are shippable parts of Now. Each task gives a coding agent the exact outcome,
+> files, dependencies, proof, and recovery need. Stop conditions require owner input.
 
 ## Objective
 
-Ship a single-tenant URL shortener with idempotent shortening and an atomic click
-counter, deployable as one container. Worth doing now because an internal tool needs
-short links this month and no shared service exists yet.
+Ship a single-tenant URL shortener with stable codes and an atomic click counter. An internal tool needs shared short links this month.
 
-**End goal:** The team's default link service — short links with click analytics that
-internal tools call via API instead of each building their own.
+**End goal:** The team's default internal link service provides short links and useful click analytics through an API.
 
 ## Release map
 
-- **Now — MVP (this plan):** shorten + redirect with a click counter, in one
-  container, for a single internal consumer.
-- **Next — V1:** milestone outline only
-  - Vanity/custom short codes
-  - A minimal click-stats endpoint (counts per code, no dashboard)
-  - Auth token so a second team can consume the API safely
-- **Later — the end goal:**
-  - Analytics dashboard
-  - Multi-tenant isolation when a second heavy consumer appears
+- **Now - MVP (this plan):** Shorten and redirect links with a click counter in one container.
+- **Next - V1:**
+  - Custom short codes
+  - A small click-count endpoint
+  - Token access for a second internal team
+- **Later - the end goal:**
+  - A small analytics view
+  - Multi-tenant isolation when a second heavy user appears
 
 ## Scope
 
 **In scope:**
-- Shorten a long URL to a stable short code (idempotent: same URL → same code).
-- Redirect a short code to its target and increment a click counter atomically.
+- Return one stable short code for the same URL.
+- Redirect a short code and increment its click count atomically.
 
 **Out of scope / non-goals:**
-- Custom/vanity codes — deliberately deferred; not building this for v1.
-- Multi-tenant isolation — single-tenant only until a second consumer appears.
-- Analytics dashboard — click counts are stored, not visualized, in v1.
+- Custom codes
+- Multi-tenant isolation
+- Analytics user interface
 
 ## Key assumptions
 
-- [2026-06-06] No real users yet — backward-compat can break freely until M3 ships.
-- [2026-06-06] Single-tenant only; multi-tenant would require a schema rework.
-- [2026-06-06] The database can be rebuilt from migrations anytime this month — no backfill required.
+- [2026-08-06] There are no production users before M3.
+- [2026-08-06] The first release has one trusted internal user.
+- [2026-08-06] Development data can be rebuilt from migrations.
 
 ## Stack
 
-PostgreSQL 16 + Drizzle ORM (atomic `UPDATE ... RETURNING` for the counter, `ON CONFLICT`
-for idempotency); Fastify on Node 20 (native TS types, schema-validated routes).
+Keep the approved Node, Fastify, Drizzle, and PostgreSQL stack. It supports the required atomic database operations without a new service.
+
+## Outcome coverage
+
+| Outcome | Covered by | Final proof |
+|---|---|---|
+| O1 - Repeated URLs return one stable code under concurrent requests | T1, T2 | `npm test -- test/shorten.test.ts` |
+| O2 - A short code redirects and records exactly one click per request | T3 | `npm test -- test/redirect.test.ts` |
+| O3 - The service builds and answers its health check in one container | T4 | `npm run smoke:container` |
 
 ## Milestones
 
 | # | Milestone | Ships | Key artifacts |
 |---|---|---|---|
-| M1 | Idempotency spike | Prove same-URL-same-code under concurrency | `schema.ts`, spike test |
-| M2 | Core service | Shorten + redirect with atomic counter | `shortener.ts`, route handlers |
-| M3 | Deploy | One container + smoke CI | `Dockerfile`, `ci.yml` |
-
-Risk-first ordering: the hardest unknown (idempotency under concurrent writes) is M1, a
-spike, before the dependent core service in M2.
+| M1 | Idempotency proof | Stable codes under concurrency | Schema and focused spike test |
+| M2 | Core service | Shorten and redirect endpoints | Service and route handlers |
+| M3 | Container | Runnable image with a health check | Container and smoke command |
 
 ## Tasks
 
-### M1 — Idempotency spike
+### M1 - Idempotency proof
 
-*After this ships: nothing user-visible yet — we've proven the trickiest part (the
-same URL always gets the same code, even under load) before building on it.*
+*After this ships: The hardest database behavior has direct proof before endpoint work starts.*
 
-- **T1 — Validate idempotent insert under concurrency**
-  - **Objective:** Prove `ON CONFLICT (url_hash) DO NOTHING ... RETURNING` returns a stable code under parallel inserts of the same URL.
-  - **Files:** `src/db/schema.ts`, `test/spike/idempotency.test.ts`
+- **T1 - Prove the concurrent insert rule**
+  - **Objective:** Prove one database row and one code result from 100 concurrent inserts of the same URL.
+  - **Files:** [existing] `src/db/schema.ts`; [new] `test/spike/idempotency.test.ts`
   - **Depends on:** none
-  - **Done when:** 100 concurrent inserts of one URL yield exactly one row and one code.
-  - **Validate:** `npm run test -- test/spike/idempotency.test.ts`
-  - **Rollback:** `git restore src/db/schema.ts test/spike/`
+  - **Done when:** The focused test records one row and one returned code across 100 concurrent inserts.
+  - **Validate:** `npm test -- test/spike/idempotency.test.ts`
+  - **Rollback:** Revert the isolated task commit and confirm the original schema migration still applies to a disposable database.
 
-### M2 — Core service
+### M2 - Core service
 
-*After this ships: you can shorten a URL and the short link redirects — the product
-works on your machine.*
+*After this ships: A local user can create and open short links.*
 
-- **T2 — Shorten endpoint**
-  - **Objective:** `POST /shorten` returns a short code, idempotent per the M1 approach.
-  - **Files:** `src/shortener.ts`, `src/routes/shorten.ts`
+- **T2 - Add the shorten endpoint**
+  - **Objective:** Make `POST /shorten` return the stable code proven in T1.
+  - **Files:** [new] `src/shortener.ts`; [new] `src/routes/shorten.ts`; [new] `test/shorten.test.ts`
   - **Depends on:** T1
-  - **Done when:** `POST /shorten` with a repeated URL returns the same code and HTTP 200.
-  - **Validate:** `npm run test -- test/shorten.test.ts`
-  - **Rollback:** `git restore src/shortener.ts src/routes/shorten.ts`
-- **T3 — Redirect with atomic counter**
-  - **Objective:** `GET /:code` 302-redirects and increments clicks in one statement.
-  - **Files:** `src/routes/redirect.ts`
+  - **Done when:** Repeated valid requests return the same code and invalid URLs return the approved error response.
+  - **Validate:** `npm test -- test/shorten.test.ts`
+  - **Rollback:** Revert the isolated task commit and confirm the pre-task route list still starts.
+- **T3 - Add redirect and click count**
+  - **Objective:** Make `GET /:code` redirect and increment the click count in one database statement.
+  - **Files:** [new] `src/routes/redirect.ts`; [new] `test/redirect.test.ts`
   - **Depends on:** T2
-  - **Done when:** `GET /:code` returns 302 to the target and the click count increases by exactly one per request under load.
-  - **Validate:** `npm run test -- test/redirect.test.ts`
-  - **Rollback:** `git restore src/routes/redirect.ts`
+  - **Done when:** Valid codes return the approved redirect, unknown codes return 404, and concurrent requests increase the count by the request total.
+  - **Validate:** `npm test -- test/redirect.test.ts`
+  - **Rollback:** Revert the isolated task commit and confirm shorten requests still pass their focused test.
 
-### M3 — Deploy
+### M3 - Container
 
-*After this ships: the shortener runs as a real service others can use, and CI proves
-every change still boots.*
+*After this ships: The service can run from one repeatable image.*
 
-- **T4 — Container + smoke CI**
-  - **Objective:** Build a runnable image and a CI job that boots it and hits `/health`.
-  - **Files:** `Dockerfile`, `.github/workflows/ci.yml`
+- **T4 - Add the container smoke path**
+  - **Objective:** Build one image, start it, and prove the health endpoint responds.
+  - **Files:** [new] `Dockerfile`; [existing] `package.json`; [new] `scripts/smoke-container.mjs`
   - **Depends on:** T3
-  - **Done when:** CI builds the image, starts it, and `curl -fsS localhost:3000/health` exits 0.
-  - **Validate:** `docker build -t shortener . && docker run -d -p 3000:3000 shortener && sleep 2 && curl -fsS localhost:3000/health`
-  - **Rollback:** `git restore Dockerfile .github/workflows/ci.yml`
+  - **Done when:** The smoke command builds the image, starts one temporary container, checks `/health`, and removes the temporary container.
+  - **Validate:** `npm run smoke:container`
+  - **Rollback:** Revert the isolated task commit and confirm the existing local start command remains unchanged.
 
 ## Checkpoints
 
 ### After M1
-- **Gate:** T1 complete and validated
-- **Validate:** `npm run test -- test/spike/idempotency.test.ts`
-- **Rollback:** `git reset --hard <pre-M1 commit>`
+
+- **Gate:** T1 passes with the approved database version.
+- **Validate:** `npm test -- test/spike/idempotency.test.ts`
+- **Rollback:** Revert the M1 commit before endpoint work starts.
 
 ### After M2
-- **Gate:** T2, T3 complete and validated
-- **Validate:** `npm run test`
-- **Rollback:** `git reset --hard <pre-M2 commit>`
+
+- **Gate:** T2 and T3 pass their focused tests.
+- **Validate:** `npm test -- test/shorten.test.ts test/redirect.test.ts`
+- **Rollback:** Revert M2 task commits in reverse order and confirm the M1 proof remains green.
 
 ### After M3
-- **Gate:** T4 complete; smoke CI green
-- **Validate:** `npm run test && docker build -t shortener .`
-- **Rollback:** `git reset --hard <pre-M3 commit>`
+
+- **Gate:** T4 passes and leaves no temporary container.
+- **Validate:** `npm run smoke:container`
+- **Rollback:** Revert the M3 task commit and use the prior approved local start command.
 
 ## Risks & mitigations
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Counter race under concurrent redirects | Medium | High | Single-statement `UPDATE ... RETURNING`; load-tested in T3 |
-| Hash collision on url_hash | Low | High | Unique constraint + `ON CONFLICT`; collision surfaces as a constraint error, not silent overwrite |
+| Concurrent inserts create different codes | Medium | High | Prove the database rule in M1 before endpoints |
+| Concurrent redirects lose click updates | Medium | High | Use one atomic statement and a focused concurrent test |
 
 ## Validation
 
-- `npm run test` — full suite green
-- `npm run lint && npx tsc --noEmit` — lint and types clean
-- `docker build -t shortener .` — image builds
+- `npm test -- test/spike/idempotency.test.ts test/shorten.test.ts test/redirect.test.ts` - all current behavior checks pass.
+- `npm run smoke:container` - the image starts, answers health, and cleans up.
 
 ## Stop conditions
 
-- The redirect or shorten path needs to touch auth — out of scope; stop and ask.
-- A schema change beyond the `urls` table is required — stop and ask before migrating.
-- Validation fails and the fix needs new dependencies — stop and ask.
+- Stop if the design needs authentication or a second tenant.
+- Stop before a destructive schema change.
+- Stop if validation needs a new service or paid account.

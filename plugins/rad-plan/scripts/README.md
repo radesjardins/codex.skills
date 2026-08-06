@@ -1,46 +1,48 @@
-# rad-plan scripts
+# RAD Plan scripts
 
-Mechanical validators that complement the skill prompts with deterministic checks an LLM can miss. Both are pure Python 3.8+ stdlib — no `pip install` required. Run with `python3` (or `python` on Windows).
+Both scripts use Python 3.8 or later and the standard library. Use `python3` or the repository's approved Python command.
 
 ## plan-lint.py
 
-Validates `docs/plan.md` against the structure in `references/plan-template.md`.
-
 ```bash
-python3 scripts/plan-lint.py docs/plan.md
-python3 scripts/plan-lint.py docs/plan.md --json   # machine-readable
+python scripts/plan-lint.py docs/plan.md
+python scripts/plan-lint.py docs/plan.md --json
 ```
 
-**What it catches:**
+Checks:
 
-- **Missing required sections** — Objective, Release map, Scope, Key assumptions, Milestones, Tasks, Checkpoints, Risks & mitigations, Validation, Stop conditions. (`Stack` is recommended, not required — flagged LOW when absent; `Shipped` is optional re-plan history and deliberately not linted.) Empty or placeholder-only required sections are flagged too.
-- **Per-task field presence** — every task in `## Tasks` must carry all six fields: Objective, Files, Depends on, Done when, Validate, Rollback. A missing or placeholder field is HIGH.
-- **Dependency integrity** — `Depends on` references must resolve to a task that exists in the file (no phantoms), no task may depend on itself, and the dependency graph must be acyclic. A cycle is CRITICAL.
-- **Vague language** — phrases like "verify it works", "should work", "tbd", "looks right" in a task's `Done when` or `Validate` field are HIGH; those fields must be concrete and runnable.
+- required sections and empty sections;
+- duplicate H2 sections;
+- the six task fields;
+- duplicate task IDs;
+- missing, self, contradictory, and cyclic dependencies;
+- Outcome coverage task links and final proof;
+- `[existing]` and `[new]` labels in 7.1 plans;
+- vague Done when, Validate, and outcome proof phrases;
+- more than 20 live tasks;
+- unsafe rollback command forms.
 
-**Exit codes:** `0` clean (or only LOW warnings), `1` CRITICAL or HIGH issues present, `2` script error.
+Plans without `<!-- rad-plan-contract: 7.1 -->` use legacy compatibility. Missing Outcome coverage is advisory for them. It is blocking for 7.1 plans.
 
-Invoked from `plan` step 4 (mechanical validation before the risk-assessor) and step 6 (final check), from `replan` and `rescue` after every restructure, from `review-plan` Step 2, and by the `risk_assessor` subagent's Pass 0. Run it standalone for spot-checks during development.
+Exit codes:
+
+- `0`: no CRITICAL or HIGH issue;
+- `1`: at least one CRITICAL or HIGH issue;
+- `2`: script error.
 
 ## validate-json.py
 
-Validates a JSON payload against a JSON Schema — the subagent contracts at `references/subagent-prompts/*.schema.json`.
-
 ```bash
-python3 scripts/validate-json.py <schema.json> <data.json>
-echo "$AGENT_OUTPUT" | python3 scripts/validate-json.py <schema> -
-python3 scripts/validate-json.py <schema> agent-output.md --extract-from-markdown
-python3 scripts/validate-json.py <schema> output.json --json
+python scripts/validate-json.py <schema.json> <data.json>
+python scripts/validate-json.py <schema.json> - --extract-from-markdown
 ```
 
-The dispatching skills use this to verify `stack-advisor` / `risk-assessor` JSON output against the documented contract before consuming it. On failure they re-prompt the agent once with the validation errors, then fall back to markdown parsing.
+Checks stack-advisor and risk-assessor output against their JSON schemas. It uses `jsonschema` when installed and a built-in subset otherwise.
 
-`pip install jsonschema` enables fuller draft-07 coverage; a pure-stdlib subset is used otherwise.
+## Focused tests
 
-**Exit codes:** `0` valid, `1` invalid, `2` script error.
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+```
 
-## What these deliberately do NOT do
-
-- **Do not judge plan quality.** Mechanical checks only — "is this validation command sensible?" is the risk-assessor's or user's job.
-- **Do not auto-fix.** They report; the user (or a downstream skill) decides what to change.
-- **Do not validate the JSON Schemas themselves.** If you edit a `.schema.json`, sanity-check it manually.
+The tests cover clean examples, duplicate sections, outcome links, path labels, unsafe rollback, contradictory dependencies, and both JSON contracts.

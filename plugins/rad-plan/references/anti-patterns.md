@@ -1,95 +1,59 @@
-# AI Coding Anti-Patterns: 14 Documented Failure Modes
+# Planning Risk Checks
 
-These 14 patterns are drawn from documented failures, AI architectural hallucinations observed in practice, and coding dead-ends reported across the planning-tool ecosystem. They are not laws — some are opinions with thresholds (clearly marked). The risk-assessor agent uses this list as a starting point for judgment passes; the mechanical validator (`scripts/plan-lint.py`) handles the deterministic ones.
+Use these eight checks during risk review. They concern plan quality. Code-review and style concerns belong to later workflows.
 
-## Architecture Anti-Patterns
+## 1. Unclear outcome
 
-### 1. Prefer pgvector Until Scale Justifies a Dedicated Vector DB
-**What:** Reaching for a separate vector database (Pinecone, Weaviate, Qdrant, Milvus) on greenfield projects without a concrete reason to leave PostgreSQL.
-**Why this is often the wrong default:** For projects under ~1M vectors with PostgreSQL already in the stack, pgvector avoids a second system to operate, sync, and reason about access control across.
-**When a dedicated vector DB is the right call:** >10M vectors, sub-50ms latency targets at high QPS, multi-tenant isolation requirements pgvector can't meet, or hybrid retrieval needs that exceed pgvector's capabilities.
-**Rule:** Justify the dedicated DB with concrete numbers from one of the categories above. Don't default to it.
+The plan cannot state what the user can do or what observable result changes.
 
-### 2. Do Not Over-Engineer MCP Servers
-**What:** Building complex abstraction layers around MCP servers for AI agents.
-**Why it fails:** Agents fight the abstraction rather than scripting against raw data.
-**Instead:** Narrowly scope MCP to authentication, network boundaries, and security gates. Let agents use simple CLIs for data access.
+**Fix:** Rewrite the outcome and final proof before task decomposition.
 
-### 3. Do Not Gatekeep Context via Rigid Subagents
-**What:** Building rigidly specialized subagents (e.g., isolated "PythonTests" agent) that hide holistic system context.
-**Why it fails:** Prevents AI from reasoning about cross-module impacts.
-**Instead:** Favor dynamic "Master-Clone" architectures where a fully-contextualized master spawns identical clones for specific tasks.
+## 2. Missing owner decision
 
-## Context Management Anti-Patterns
+The plan chooses product behavior, risk acceptance, cost, or an irreversible action that the owner has not approved.
 
-### 4. Do Not Create "Kitchen Sink" Sessions
-**What:** Mixing unrelated tasks, feature builds, and refactoring in a single AI conversation.
-**Why it fails:** Severe context bleed -- AI confuses priorities and drops important constraints.
-**Instead:** Start a fresh thread for every specific, bounded task. One task per conversation.
+**Fix:** Ask one clear question and record the answer or mark the item unknown.
 
-### 5. Do Not Trust Auto-Compaction
-**What:** Relying on built-in auto-compaction to manage token limits during long sessions.
-**Why it fails:** Highly lossy and opaque -- AI forgets crucial architectural decisions and migration contexts.
-**Instead:** Use the "Document & Clear" pattern: dump state to markdown, clear session, rehydrate from file.
+## 3. Unbounded investigation
 
-### 6. Do Not Permit Infinite Exploration
-**What:** Issuing open-ended instructions like "investigate this issue" without search boundaries.
-**Why it fails:** Agent reads hundreds of irrelevant files, rapidly consuming context and polluting reasoning.
-**Instead:** Set strict search boundaries: specific directories, file patterns, and a maximum number of files to examine.
+A task says to explore, research, audit, or inspect without paths, questions, evidence limits, or a stop rule.
 
-### 7. Do Not Overload AGENTS.md
-**What:** Treating system instruction files as exhaustive documentation dumps.
-**Why it fails:** Past 150-200 instructions, AI arbitrarily ignores critical rules. Context window exhausted.
-**Instead:** Keep under 200 lines. Cut anything AI can infer from the codebase. Use progressive disclosure to link external docs.
+**Fix:** Set the target, file or source budget, required output, and stop condition.
 
-### 8. Do Not Trap Agent in Endless Correction Loops
-**What:** Repeatedly prompting the AI to fix a mistake after it has already failed twice.
-**Why it fails:** Context becomes polluted with failed approaches and apologies. Each retry makes output worse.
-**Instead:** After 2 consecutive failures on the same issue, clear context immediately. Analyze the failure, write a fresh structurally sound prompt, restart.
+## 4. Unjustified new system
 
-## Code Quality Anti-Patterns
+The plan adds a service, framework, database, dependency, or abstraction without naming the approved requirement that needs it.
 
-### 9. Do Not Fall into the "Fallback Trap"
-**What:** Instructing AI to "add a fallback mechanism" or "add error handling to catch this" when it encounters an edge case.
-**Why it fails:** Masks root causes, leads to silent failures and accumulating technical debt.
-**Instead:** Always force the AI to identify and fix the underlying root cause. Never mask errors.
+**Fix:** Use the current stack or record the requirement and score the smallest plausible choices.
 
-### 10. Do Not Allow "Comments Everywhere"
-**What:** Accepting generated code cluttered with excessive explanatory comments.
-**Why it fails:** AI over-comments to assist its internal reasoning, but this creates bloated code with high cognitive load for human reviewers.
-**Instead:** Require comments only where logic is non-obvious. Self-documenting code is the goal.
+## 5. Unsafe state change
 
-### 11. Do Not Accept Stale APIs or Hallucinated Dependencies
-**What:** Blindly executing code that calls third-party systems without verification.
-**Why it fails:** AI exhibits "By-the-Book Fixation" -- uses deprecated endpoints, hallucinated imports, or legacy API versions.
-**Instead:** Always verify third-party API calls against current documentation. Use Context7 or web search for current API references.
+A migration, deployment, delete, payment, auth, or external action lacks a safe recovery path or owner gate.
 
-### 12. Do Not Edit Tests Just to Turn Them Green
-**What:** Allowing AI to delete tests, remove assertions, or modify test expectations to match broken implementation.
-**Why it fails:** Silently erodes test quality. Tests become meaningless green checks that miss real bugs.
-**Instead:** Use coverage gates as behavioral guardrails. Tests define correct behavior; implementation must match tests, not the reverse.
+**Fix:** Add a focused check, safe rollback strategy, backup or prior artifact, and stop condition.
 
-### 13. Do Not Tolerate Unsolicited Over-Engineering
-**What:** Allowing AI to perform premature refactoring, create unrequested helper functions, or invent extra abstractions.
-**Why it fails:** Codebase succumbs to "hallucination entropy" -- unnecessary complexity introduced by AI trying to be helpful.
-**Instead:** Demand the simplest possible approach. Three similar lines of code is better than a premature abstraction.
+## 6. Weak proof
 
-### 14. Do Not "Shoot and Forget"
-**What:** Accepting AI code output without formal verification and test-driven validation.
-**Why it fails:** Industry reports consistently show higher vulnerability rates and accumulated technical debt when AI output is integrated without review — the specific magnitude varies by codebase and review rigor, but the direction is unambiguous.
-**Instead:** Mandate that every AI-generated artifact is reviewed against strict architectural specifications before integration. AI is a draft generator, not an independent developer.
+Done when or Validate can pass while the user outcome is still broken.
 
-## How to Use This List
+**Fix:** Use an observable result and a focused positive, negative, or recovery check as risk requires.
 
-During plan review, the risk-assessor agent checks every proposed task against these 14 patterns. If any task instruction could trigger one, it must be flagged with:
-- The specific anti-pattern number and name
-- Why the current plan risks triggering it
-- A concrete alternative approach
+## 7. Work unit too large
 
-### What the mechanical validator handles vs. what needs judgment
+A task cannot fit one bounded work session, a milestone has more than five tasks without reason, or the live plan has more than 20 tasks.
 
-`scripts/plan-lint.py` handles parts of #6 (search boundaries are inferable from task scope), #7 (line-count check on AGENTS.md output), and #12 (validation/rollback presence). Everything else needs LLM judgment because it's about the *intent* of a plan or task, not its structural shape.
+**Fix:** Split by a shippable outcome or reduce the current release.
 
-### These are starting points, not laws
+## 8. Authority conflict
 
-Anti-patterns 1, 9, 10, and 13 in particular are opinions with thresholds. A "this is wrong" verdict from the risk-assessor on these should always include the concrete reason — not just "violates anti-pattern #N".
+The plan contradicts an approved PRD, architecture choice, repository instruction, or current code fact without surfacing the conflict.
+
+**Fix:** Resolve the conflict with the owner or record a durable follow-up before approval.
+
+## Mechanical and judgment boundary
+
+`plan-lint.py` checks section shape, task fields, IDs, dependencies, outcome links, duplicate sections, path labels for 7.1 plans, vague phrases, and unsafe rollback command forms.
+
+The risk assessor judges outcome quality, owner decisions, investigation bounds, new-system need, rollback meaning, task size, tests, and authority conflicts.
+
+An issue must cite the exact plan text, state the effect, and give the smallest useful fix.
