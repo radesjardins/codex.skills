@@ -4,13 +4,13 @@ A public marketplace of Codex workflow plugins by Ryan DesJardins.
 
 The plugins add written procedures, templates, and small local checks. They help Codex handle work in a repeatable way. Installing this marketplace does not add a hosted service, database, account system, or background worker.
 
-The current catalog has 5 plugins and 24 skills. All packages use the MIT License.
+The current catalog has 5 plugins and 25 skills. All packages use the MIT License.
 
 ## Choose a plugin
 
 | Plugin | Version | Best fit | What it adds |
 | --- | ---: | --- | --- |
-| [Claude to Codex Plugin Port](plugins/claude-to-codex-plugin-port/) | 0.1.0 | Authors moving a Claude Code plugin or skill to Codex | A porting workflow and a scanner for common Claude-only leftovers |
+| [RAD Plugin Converter](plugins/rad-plugin-converter/) | 1.0.0 | Authors auditing or converting Claude Code, Codex, mixed, or older plugin packages | A read-only standards audit and a deterministic converter for the Agent Plugins 1.0.0 Working Draft |
 | [RAD Brainstorm](plugins/rad-brainstorm/) | 4.1.0 | One person who wants guided idea work before planning | User-first ideation, separate evaluation, idea-source labels, and a small proof step |
 | [RAD Plan](plugins/rad-plan/) | 7.1.0 | Solo builders and small teams planning one bounded release | Repository-backed planning, rescue, replan, plan review, and a mechanical plan check |
 | [RAD Repo](plugins/rad-repo/) | 3.1.0 | Repositories used across many coding-agent sessions | A small document model, handoffs, local command trust, shipping checks, and an optional code-hotspot review |
@@ -22,7 +22,7 @@ These plugins use known practices. They do not claim to invent PARA, Five Whys, 
 
 Their value comes from how those practices are joined and limited:
 
-- Claude to Codex Plugin Port joins a manual migration checklist with a local residue scanner. It treats hook behavior as work that must be mapped, removed, or replaced.
+- RAD Plugin Converter uses a standard migration inventory and validation process. It adds the portable root manifest while retaining supported client files, and it checks skill and MCP configuration before writing changes.
 - RAD Brainstorm uses familiar idea methods. Its specific focus is idea ownership: the user starts, each contribution has a source label, judgment happens later, and the result ends with a test threshold and stop signal.
 - RAD Plan resembles other planning assistants and spec templates. It adds bounded repository reading, one maintained plan, outcome coverage, safe recovery fields, rescue and replan paths, plus separate mechanical and judgment checks.
 - RAD Repo uses common repository instructions, handoffs, and Git checks. Its main difference is a small authority model and clone-local approval for repository validation commands.
@@ -53,7 +53,7 @@ The marketplace name is radesjardins-codex-skills.
 Install only the plugins you want:
 
 ~~~powershell
-codex plugin add claude-to-codex-plugin-port@radesjardins-codex-skills
+codex plugin add rad-plugin-converter@radesjardins-codex-skills
 codex plugin add rad-brainstorm@radesjardins-codex-skills
 codex plugin add rad-plan@radesjardins-codex-skills
 codex plugin add rad-repo@radesjardins-codex-skills
@@ -64,7 +64,7 @@ The plugins do not require each other. RAD Brainstorm, RAD Plan, and RAD Repo me
 
 ## Example requests
 
-- "Port this Claude Code plugin to my Codex marketplace."
+- "Audit this Codex plugin for Agent Plugins 1.0.0, then convert it in place."
 - "Run a quick brainstorm and let me give my ideas first."
 - "Create a full implementation plan from this repository."
 - "Run RAD Repo startup and show the next task."

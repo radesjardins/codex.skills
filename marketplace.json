@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "claude-to-codex-plugin-port",
+      "name": "rad-plugin-converter",
       "source": {
         "source": "local",
-        "path": "./plugins/claude-to-codex-plugin-port"
+        "path": "./plugins/rad-plugin-converter"
       },
       "policy": {
         "installation": "AVAILABLE",
