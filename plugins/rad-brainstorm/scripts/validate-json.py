@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-validate-json.py - Validate JSON output against a JSON Schema.
+validate-json.py - Run JSON Schema validation on JSON output.
 
 Used by RAD Brainstorm skills to make the JSON-first subagent contracts real:
 the dispatching skill captures the agent's JSON output, runs it through this script,
-and re-prompts on validation failure rather than silently falling back to markdown.
+and re-prompts on schema validation failure rather than silently falling back to markdown.
 
 Usage:
   python3 validate-json.py <schema.json> <data.json>
@@ -13,13 +13,13 @@ Usage:
                                                        # extract first ```json block then validate
 
 Output:
-  Default - text. "OK" + exit 0 on success; error report + exit 1 on validation failure.
+  Default - text. "OK" + exit 0 on success; error report + exit 1 on schema validation failure.
   --json - single JSON result object: {"valid": bool, "errors": [{"path": "...", "message": "..."}]}
   Exit 2 reserved for script errors (file not found, invalid schema, malformed JSON beyond extraction).
 
 This script implements the subset of JSON Schema draft-07 we actually use across
 RAD Brainstorm contracts: type, required, properties, items, enum, additionalProperties,
-const, oneOf (basic), and $ref to local definitions. If the third-party `jsonschema`
+const, oneOf (basic), minItems, minLength, minimum, and $ref to local definitions. If the third-party `jsonschema`
 package is installed it will be used preferentially for fuller draft-07 coverage.
 
 No third-party dependencies required for the subset we use. Python 3.8+.
@@ -119,14 +119,29 @@ def _validate(data, schema: dict, path: str, root: dict, errors: list[dict]) -> 
         if "minItems" in schema and len(data) < schema["minItems"]:
             errors.append({"path": path, "message": f"array shorter than minItems={schema['minItems']}"})
 
+    if isinstance(data, str) and "minLength" in schema and len(data) < schema["minLength"]:
+        errors.append({"path": path, "message": f"string shorter than minLength={schema['minLength']}"})
+
+    if (
+        isinstance(data, (int, float))
+        and not isinstance(data, bool)
+        and "minimum" in schema
+        and data < schema["minimum"]
+    ):
+        errors.append({"path": path, "message": f"number smaller than minimum={schema['minimum']}"})
+
     if "oneOf" in schema:
         matches = 0
+        candidate_errors: list[list[dict]] = []
         for sub in schema["oneOf"]:
             sub_errors: list[dict] = []
             _validate(data, sub, path, root, sub_errors)
+            candidate_errors.append(sub_errors)
             if not sub_errors:
                 matches += 1
         if matches != 1:
+            if matches == 0 and candidate_errors:
+                errors.extend(min(candidate_errors, key=len))
             errors.append({"path": path, "message": f"oneOf matched {matches} schemas, expected 1"})
 
 

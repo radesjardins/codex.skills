@@ -1,169 +1,106 @@
 ---
 name: brainstorm-session
-description: Use when the user explicitly wants to brainstorm, generate or expand ideas, explore alternatives, use SCAMPER or another named creative method, or work from a blank or vague starting point. Do not use for a request that only needs a direct answer, root-cause analysis, idea ranking, or implementation planning.
+description: Use when the user explicitly wants to brainstorm, generate or expand ideas, explore alternatives, use a named creative method, or work from a blank or vague starting point. Do not use for a direct answer, root-cause interview, idea ranking, technical design, or implementation planning.
 ---
 
 # Brainstorm Session
 
-Help the user develop ideas without anchoring them on an AI list.
+Help the user develop and select ideas while keeping ownership visible. Do not write code, scaffold a project, start planning, or commit files.
 
-Do not write code, scaffold a project, invoke an implementation workflow, or start implementation. Finish the thinking process and get the user's approval first.
-
-Resolve the plugin root as the directory two levels above this `SKILL.md`. Read `references/facilitation-principles.md` before facilitating. Read only the other references needed for the chosen method.
+Resolve the plugin root as the directory two levels above this `SKILL.md`. Read `references/facilitation-principles.md`. Read one other reference only when its step requires it.
 
 ## Companion-skill rule
 
-Name an exact RAD Plan, RAD Repo, or RAD Council skill only when:
+Name an exact RAD Plan, RAD Repo, or RAD Council skill only when the skill is installed, appears in the current available-skill list, current evidence needs it, and it would add clear value. Never invoke it until the user asks or accepts. Public namespaces are `rad-plan:*`, `rad-repo:*`, and `rad-council:*`.
 
-1. The exact skill is installed and appears in the current available-skill list.
-2. Current evidence needs that workflow.
-3. It would add clear value.
+## 1. Set the session
 
-Never invoke a suggested companion until the user asks or accepts. The public namespaces are `rad-plan:*`, `rad-repo:*`, and `rad-council:*`.
+When intent is unclear, ask: "Do you want a quick take or a brainstorm session?"
 
-## 1. Confirm what the user wants
+Choose the tier:
 
-Some prompts such as "help me think through this" may ask for a direct answer. When intent is unclear, ask one short question: "Do you want a quick take or a brainstorm session?"
+- **Quick:** default for a bounded topic. Use one method, aim for three strong options and one recommendation, use no subagents, create no file unless asked, and aim to finish within five user turns.
+- **Full:** use for an open, uncertain, or high-stakes topic. It may add research, a focused challenge, and one optional checkpoint.
 
-Continue with this workflow only when the user wants a brainstorm.
+Choose the working mode when unclear:
 
-## 2. Select the tier
+- **Facilitator:** the user generates and Codex guides. Default.
+- **Partner:** the user starts, then both contribute.
+- **Generator:** Codex gives a small first set for the user to reject or change.
 
-Use quick for a small, bounded topic or when the user asks for speed. State that choice and offer full.
+State the tier and mode.
 
-Quick tier:
+## 2. Frame the target
 
-- Ask for the user's starting thoughts.
-- Use one suitable technique.
-- Produce three strong options and one recommendation.
-- Use no subagents.
-- Create no file unless asked.
-- Aim to finish within five user turns.
+Settle these facts before broad generation:
 
-Use full for an open, uncertain, or high-stakes topic. Full follows the complete flow below.
+- goal;
+- primary user or affected person;
+- success signal;
+- hard constraint.
 
-## 3. Select the working mode
+Infer facts already clear from the request. Ask one question per turn for a missing fact that could change the idea set. In quick mode, ask only the highest-value missing question.
 
-When it is unclear who should generate, ask: "Do you want to generate while I guide, generate together, or react to ideas I generate?"
+For software topics, inspect relevant repository docs, code, tests, and recent Git history before proposing designs. Keep this read-only.
 
-- Facilitator is the default. The user generates first.
-- Partner means both contribute after the user shares initial thinking.
-- Generator uses the quick flow and lets the user react.
+Route a complete idea set that only needs ranking to `rad-brainstorm:idea-evaluation`.
 
-## 4. Detect the starting state
+## 3. Capture the user's starting ideas
 
-Choose one:
+In facilitator and partner modes, ask what the user has considered before offering ideas. Include half-formed ideas and rejected directions. Record every idea with a stable ID and source:
 
-- Blank slate
-- Vague idea
-- Clear idea that needs alternatives
-- Existing idea that needs improvement
-- Existing ideas that need evaluation
+- `I1 [user]`
+- `I2 [AI]`
+- `I3 [research]`
 
-If the user already has a complete idea set and wants to choose, route to `rad-brainstorm:idea-evaluation`.
+Build from the user's terms and constraints. If the user is stuck, use `references/creative-unblocking.md`. In generator mode, state that AI ideas will set the first anchors and label them `[AI]`.
 
-If the request covers several independent systems, help split it and brainstorm one part first.
+## 4. Add research with consent
 
-For software topics, read relevant repository docs, related code, and recent Git history before proposing designs. Keep this read-only.
+Offer research only when a current market, rule, technology, or unfamiliar fact could change the idea set. State the exact research question and value, then ask permission.
 
-## 5. Run the anti-anchoring check
+If accepted, use `references/subagent-prompts/domain-research.md`. Use one bounded, read-only subagent when available, or perform the same bounded work directly. Require JSON-first output. Run schema validation with `scripts/validate-json.py` and `domain-research.schema.json`. Re-prompt once on failure. Cite sources and add useful findings as `[research]` ideas or constraints.
 
-Before offering ideas, ask the user what they have already considered. Ask one question at a time.
+## 5. Generate, then check diversity
 
-Cover only what is needed:
+Announce generation. Keep evaluation out of this phase. Read the selected card in `references/methodology-catalog.md`.
 
-1. Existing thoughts, including half-formed ones.
-2. The direction that feels appealing.
-3. Anything already ruled out and why.
+Use one core method first. Add another method in a full session only when it is likely to produce a different mechanism. Keep a running idea list with IDs and source labels.
 
-Capture the user's ideas before adding yours. Build from their language and constraints.
+After generation:
 
-If the user has no ideas, use the progressive engagement ladder in `references/creative-unblocking.md`. Start with the situation or frustration. Do not answer a blank page with a long idea list.
+1. Group ideas by the underlying way they create value or solve the problem.
+2. Show repeated mechanisms and any missing mechanism.
+3. If the set is narrow, run one small pass from distinct ordinary stakeholder views or a different method.
+4. For ten or more ideas, or clear duplicates, cluster exact and near duplicates. Preserve original text, IDs, and source labels. Ask before merging ideas that differ in audience, mechanism, channel, cost, or risk.
 
-## 6. Add research only when it helps
+## 6. Evaluate separately
 
-Current research is useful when the topic depends on a market, regulation, recent technology, or unfamiliar domain. Do not offer it as an opening menu item.
+Announce the phase change. Read only the selected section in `references/evaluation-frameworks.md`. The user scores or ranks first. Share the AI view after the user's scores, then discuss material differences.
 
-When the conversation reaches a question that research could answer, explain the exact value and ask permission. If accepted:
+For a high-stakes choice, offer one bounded idea challenge only when it could change the result. If accepted, use `references/subagent-prompts/idea-challenge.md`, then run schema validation with `idea-challenge.schema.json`. Keep the challenge read-only and within the current candidates.
 
-1. Use `references/subagent-prompts/domain-research.md` with the topic and session context.
-2. When subagents are available, spawn one bounded, read-only research subagent. It may search the web and read supplied files. It must not edit files.
-3. When subagents are unavailable, do the same bounded research directly.
-4. Require JSON-first output and validate it with `scripts/validate-json.py` and `domain-research.schema.json`.
-5. Re-prompt once if validation fails. If it still fails, use the reliable parts only and state the limit.
-6. Cite current sources and weave two or three useful findings into the questions. Do not dump the research brief into the session.
+## 7. Deliver one stable result
 
-## 7. Generate without evaluating
+Use the result contract in `references/session-output.md`. Include:
 
-Announce that idea generation has started. Keep judgment out of this phase.
+- recommendation and strong alternative;
+- original idea sources and mechanism groups;
+- parked or rejected ideas with short reasons;
+- riskiest assumption;
+- cheapest proof, pass threshold, and stop signal;
+- next useful decision or action.
 
-Use a named method when the user asks for one. Otherwise select from `references/methodology-catalog.md`:
+Offer a Mermaid summary only when it makes three or more relationships easier to understand. Keep the text result as the source of truth.
 
-| Starting state | Good first sequence |
-| --- | --- |
-| Blank slate | Creative unblock, starbursting, How Might We |
-| Vague idea | Clarify, SCAMPER, reverse brainstorming |
-| Clear idea | Six Thinking Hats, morphological analysis |
-| Improving existing | SCAMPER, Five Whys, TRIZ when technical |
-| Stuck | Worst Possible Idea, random entry, Crazy 8s |
+For a chosen software approach that needs technical design, offer `rad-brainstorm:software-design`. Do not start it without acceptance.
 
-Named modes include `scamper`, `six-hats`, `reverse`, `hmw`, `starburst`, and `unblock`.
+## 8. Save or checkpoint only with approval
 
-Keep a running idea list. When ideas repeat or become minor variations, ask to switch to evaluation.
+For a full session at risk of interruption, offer the checkpoint contract in `references/session-output.md`. Get a destination before writing. Quick sessions remain file-free unless the user asks.
 
-## 8. Evaluate in a separate phase
+For the final result, offer conversation only, one dated Markdown file in a chosen personal folder, or `docs/YYYY-MM-DD-<topic>-spec.md` in the current project. Mark a project file as transient when a later planning workflow will consume it. Never write to `docs/design.md`. Never auto-commit.
 
-Announce the switch. Read `references/evaluation-frameworks.md` and choose the smallest useful method.
+## 9. Close
 
-The user scores or ranks first. Then share your view and discuss differences. Narrow to two or three candidates.
-
-For a high-stakes choice, offer one focused idea challenge only when it would change the decision. If accepted:
-
-1. Use `references/subagent-prompts/idea-challenge.md`.
-2. Spawn one bounded, read-only subagent when available, or run the same review directly.
-3. Validate the JSON with `idea-challenge.schema.json`.
-4. Use the findings to strengthen the candidates. Do not let the challenge restart unrestricted ideation.
-
-## 9. Present the result
-
-Present two or three approaches with trade-offs and a recommendation. Scale the result to the domain.
-
-For software, cover architecture, components, data flow, error handling, and testing only after the user selects an approach. If the chosen approach needs more technical work than the session can settle, offer `rad-brainstorm:design-sprint`.
-
-When a full software session produces a complete spec, review it here before delivery:
-
-1. Scan for placeholders, contradictions, scope growth, ambiguity, missing recovery behavior, and unneeded complexity.
-2. Fix confirmed issues.
-3. When subagents are available, run one bounded, read-only review with `references/subagent-prompts/spec-review.md`.
-4. Validate the JSON with `scripts/validate-json.py` and `spec-review.schema.json`.
-5. Explain and address blocking findings. Run another subagent review only when the user asks.
-
-Every delivered result includes:
-
-- the chosen direction;
-- the strongest alternative;
-- considered and rejected ideas with one-line reasons;
-- assumptions that still need proof;
-- the next useful decision or action.
-
-Do not use placeholders such as TBD or TODO. State a clear deferral and reason when a point cannot be settled.
-
-## 10. Ask where the output goes
-
-Offer these choices:
-
-1. Keep it in the conversation.
-2. Save one dated Markdown file in a personal folder chosen by the user.
-3. Save one dated Markdown file under the current project's `docs/` folder when the topic is that project.
-
-For project output, suggest `docs/YYYY-MM-DD-<topic>-spec.md`. Mark it as transient when a later planning workflow will consume it. Never write to `docs/design.md`.
-
-If `docs/ideas.md` already exists, offer to append rejected or parked ideas. Do so only after the user accepts. Do not create that shelf file.
-
-Never commit the output.
-
-## 11. Close the session
-
-Ask whether the result meets the user's need. Get clear approval before suggesting a next workflow.
-
-For software sequencing, name `rad-plan:plan` only under the companion-skill rule. When it is absent or unhelpful, say that implementation planning is the next general step without naming a plugin.
+Ask whether the result meets the user's need. Get clear approval before suggesting another workflow. Name a companion skill only under the companion-skill rule.

@@ -1,85 +1,68 @@
 ---
 name: idea-evaluation
-description: Use when the user already has two or more ideas and wants to compare, rank, test, or select among them with a clear evaluation method. Do not use to generate the first idea set, find a root cause, or create an implementation plan.
+description: Use when the user already has two or more ideas and wants to compare, rank, test, or select among them. Do not use to create the first idea set, conduct a root-cause interview, produce a technical design, or plan implementation.
 ---
 
 # Idea Evaluation
 
-Evaluate an existing idea set without restarting unrestricted ideation.
+Evaluate an existing idea set without restarting broad ideation. The user scores first and makes the final choice.
 
-Resolve the plugin root as the directory two levels above this `SKILL.md`. Read `references/facilitation-principles.md` and the relevant part of `references/evaluation-frameworks.md`.
+Resolve the plugin root as the directory two levels above this `SKILL.md`. Read only the selected section in `references/evaluation-frameworks.md`.
 
 ## Companion-skill rule
 
-Name `rad-council:convene` only when that exact skill is installed, appears in the current available-skill list, the decision is high-stakes, opposed expert views would add clear value, and the user accepts. Otherwise keep the evaluation here.
+Name `rad-council:convene` only when it is installed, appears in the current available-skill list, the decision is high-stakes, opposed expert views would add clear value, and the user accepts.
 
-## Hard rule
+## 1. Prepare the idea set
 
-The user scores, ranks, or rates first. Share your view after theirs, then discuss why the scores differ.
+List every candidate with a stable ID. Label ideas supplied in this session as `[user]`, `[AI]`, or `[research]`. Ask whether the set is complete. Route back to `rad-brainstorm:brainstorm-session` only when more options are needed.
 
-## 1. Confirm the idea set
+For ten or more ideas, or obvious duplicates:
 
-List and number every candidate. Ask whether the set is complete. If the user still needs more options, route to `rad-brainstorm:brainstorm-session` before evaluation.
+1. Cluster exact and near duplicates by underlying mechanism.
+2. Preserve each original ID, wording, and source.
+3. Ask before merging ideas that differ in audience, mechanism, channel, cost, or risk.
 
 ## 2. Select one framework
 
-Recommend the smallest method that fits and let the user choose.
+Recommend the smallest method that answers the decision question:
 
-| Situation | Good method |
+| Situation | Method |
 | --- | --- |
 | Ten or more ideas | Impact and Effort |
-| Three to five ideas with major unknowns | Assumption Mapping |
-| Product ideas tied to an outcome | Opportunity Solution Tree |
-| A high-risk choice | Pre-Mortem plus Assumption Mapping |
+| Major unknowns | Assumption Mapping |
+| Ideas tied to one product outcome | Opportunity Solution Tree |
+| High-risk choice | Pre-Mortem, then Assumption Mapping |
 | Two or three finalists | Weighted Scoring |
 | Unclear user need | Jobs-to-be-Done |
 
-Define every criterion before scoring. Avoid false precision when totals are close.
+Define criteria before scoring. Avoid false precision when results are close.
 
 ## 3. Apply the method
 
-Use one question at a time. Keep the user's scores separate from yours.
+Ask one question at a time. Record user scores separately from AI comments. For each leader, capture:
 
-For each leading idea, capture:
-
-- evidence-backed strengths;
-- key trade-offs;
+- evidence-backed strength;
+- main trade-off;
 - riskiest assumption;
-- cheapest useful test;
-- failure or stop signal.
+- cheapest useful proof;
+- pass threshold;
+- stop signal.
+
+Use a threshold that can be observed. If a useful threshold cannot yet be set, name the missing evidence and the decision needed to set it.
 
 ## 4. Challenge only when useful
 
-For the top two or three ideas, offer a deeper challenge only when the stakes justify the time and the result could change the choice.
+Offer one deeper challenge only when the stakes justify it and the result could change. If accepted, use `references/subagent-prompts/idea-challenge.md`. Run it with one bounded, read-only subagent when available, or perform the same check directly. Require JSON-first output and run schema validation with `scripts/validate-json.py` and `idea-challenge.schema.json`. Re-prompt once on failure.
 
-If accepted:
+## 5. Present the result
 
-1. Use `references/subagent-prompts/idea-challenge.md`.
-2. Spawn one bounded, read-only subagent when available, or run the same review directly.
-3. Require JSON-first output and validate it with `scripts/validate-json.py` and `idea-challenge.schema.json`.
-4. Re-prompt once on schema failure.
-5. Use the critique to strengthen the decision. Do not let it add unrelated ideas.
+Use `references/session-output.md` and keep the result concise:
 
-## 5. Present the decision
+- recommended idea and why it leads;
+- strong alternative and its main trade-off;
+- parked or rejected ideas;
+- riskiest assumption;
+- cheapest proof, pass threshold, and stop signal.
 
-Use this shape:
-
-### Recommended: <idea>
-
-- Why it leads
-- Riskiest assumption
-- Cheapest next proof
-- Stop signal
-
-### Strong alternative: <idea>
-
-- Why it remains credible
-- Main trade-off against the recommendation
-
-### Parked or rejected
-
-- Idea and one-line reason
-
-Ask whether the ranking matches the user's judgment. The user makes the final choice.
-
-For a chosen software idea, offer `rad-brainstorm:design-sprint`. Do not start implementation.
+Ask whether the result matches the user's judgment. For a chosen software idea that needs technical design, offer `rad-brainstorm:software-design`. Do not start implementation.

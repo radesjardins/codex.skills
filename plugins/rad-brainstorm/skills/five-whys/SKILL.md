@@ -1,40 +1,33 @@
 ---
 name: five-whys
-description: Use when the user wants root-cause analysis for a repeated problem, failure, delay, defect, or other symptom. Do not use for open-ended ideation, option ranking, or a request to diagnose code from evidence without a user-led causal interview.
+description: Use when the user wants a user-led root-cause interview for a repeated problem, failure, delay, defect, or other observed symptom. Do not use for open ideation, option ranking, or evidence-led code diagnosis.
 ---
 
 # Five Whys
 
-Help the user trace a stated symptom to an actionable root cause. The user supplies the causal answers. Ask one question at a time and do not suggest the answer.
+Use Five Whys as a small problem-framing tool. Ask one question at a time. The user supplies causal answers.
 
 ## Process
 
-1. Restate the observed problem in concrete terms.
+1. Restate the observed symptom, timing, and effect in concrete terms.
 2. Ask why it happened.
-3. Use the user's answer as the subject of the next why question.
-4. Continue until the chain reaches an actionable system, process, policy, resource, or design cause.
+3. Use the answer as the subject of the next why question.
+4. Mark each answer as direct evidence, user belief, or inference.
+5. Stop when the chain reaches an actionable system, process, policy, resource, or design cause.
 
-Five is a guide. Stop at three when the root cause is clear. Continue past five when the chain is still at a symptom.
+Five is a guide. Stop sooner when the cause is clear. Continue when the answer still describes a symptom.
 
-When the chain branches, list the branches and ask which one has the greatest effect. Explore that branch first. Return to another branch only when it could change the conclusion.
+When more than one cause is credible, list the branches. Ask which branch has the greatest effect or strongest evidence. Explore that branch first. Return to another branch only when it could change the conclusion.
 
 ## Guardrails
 
-- Separate direct evidence, user belief, and inference.
-- Avoid blame. Look for system causes.
-- Do not force one simple cause onto a multi-cause problem.
-- Stop when another why would only repeat the same fact.
-- Do not propose solutions before the user confirms the root cause.
-- Do not edit files or start implementation.
+- Look for system causes and avoid personal blame.
+- Keep multiple causes when evidence supports them.
+- Stop when another why would repeat the same fact.
+- State uncertainty when evidence is missing.
+- Wait for the user to confirm the likely cause before discussing solutions.
+- Do not edit files, start implementation, or commit output.
 
 ## Close
 
-Present:
-
-- the original symptom;
-- the causal chain;
-- the likely root cause;
-- important branches that were not explored;
-- evidence that would confirm or disprove the conclusion.
-
-Ask whether the user agrees with the root cause. If yes, offer to brainstorm solutions with `rad-brainstorm:brainstorm-session` and select a method from `references/methodology-catalog.md`.
+Present the symptom, causal chain, likely root cause, untested branches, and evidence that would support or disprove the result. Ask whether the user agrees. After agreement, offer `rad-brainstorm:brainstorm-session` for solutions.

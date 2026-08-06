@@ -1,6 +1,6 @@
 # RAD Brainstorm scripts
 
-`validate-json.py` checks the JSON returned by optional Codex research and review subagents.
+`validate-json.py` runs JSON Schema validation on output from optional Codex research and review subagents.
 
 ```text
 python scripts/validate-json.py references/subagent-prompts/domain-research.schema.json result.json

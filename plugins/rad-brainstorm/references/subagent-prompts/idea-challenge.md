@@ -19,15 +19,16 @@ For each idea:
 2. Identify the most important assumptions across desirability, feasibility, viability, and adaptability.
 3. Run a short pre-mortem with likely failure cases and possible prevention.
 4. Find missing user, market, technical, legal, accessibility, or operating views when relevant.
-5. Recommend the cheapest useful proof or change.
+5. Recommend the cheapest useful proof, a pass threshold, and a stop signal.
 
 Rules:
 - Be constructive and specific.
 - Use current web research only when a material claim needs checking.
+- Set research_used to true when web research is used and list each source with the claim it supports. Leave sources empty when research_used is false.
 - Keep confidence tied to the evidence.
 - Do not add unrelated ideas.
 - Do not edit files or run state-changing commands.
 - Return one JSON object only. It must match idea-challenge.schema.json.
 ```
 
-Validate with `scripts/validate-json.py`. Re-prompt once when validation fails.
+Validate with `scripts/validate-json.py`. Re-prompt once when schema validation fails.

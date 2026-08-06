@@ -1,7 +1,7 @@
 {
   "name": "rad-brainstorm",
-  "version": "4.0.0",
-  "description": "Anti-anchoring brainstorming for Codex. It draws out the user's thinking before adding ideas, keeps generation separate from evaluation, and supports quick sessions, full sessions, root-cause analysis, idea evaluation, and software design sprints.",
+  "version": "4.1.0",
+  "description": "User-led brainstorming for Codex. It keeps generation separate from evaluation and supports quick sessions, full sessions, problem framing, idea evaluation, and software design.",
   "author": {
     "name": "RAD",
     "url": "https://github.com/radesjardins"
@@ -17,13 +17,13 @@
     "six-thinking-hats",
     "five-whys",
     "idea-evaluation",
-    "design-sprint"
+    "software-design"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "RAD Brainstorm",
     "shortDescription": "Think first, then build better ideas with Codex.",
-    "longDescription": "RAD Brainstorm helps users explore ideas without anchoring them on an AI-generated list. It asks for the user's thinking first, separates idea generation from evaluation, and scales from a quick bounded pass to a full facilitated session. It also includes Five Whys root-cause analysis, structured idea evaluation, and software design sprints. It never implements application code.",
+    "longDescription": "RAD Brainstorm is a one-person, text-first thinking partner. It asks for the user's ideas first, labels user, AI, and research contributions, checks for distinct mechanisms, and keeps generation separate from evaluation. It supports quick and full sessions, Five Whys problem framing, structured idea evaluation, and software design. It never implements application code.",
     "developerName": "RAD",
     "category": "Productivity",
     "capabilities": [

@@ -33,4 +33,4 @@ Rules:
 - Return one JSON object only. It must match spec-review.schema.json.
 ```
 
-Validate with `scripts/validate-json.py`. The normal workflow uses one subagent review. Further review happens only when the user asks.
+Run schema validation with `scripts/validate-json.py`. The normal workflow uses one subagent review. Further review happens only when the user asks.
