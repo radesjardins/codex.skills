@@ -1,0 +1,39 @@
+# Handoff
+
+**Updated:** <YYYY-MM-DD>
+**Branch:** <branch>
+**Working tree:** <clean / dirty summary>
+
+<!-- A snapshot, not a log. Overwritten each /wrapup (or /ship) from git evidence.
+     Keep the whole file ≤60 lines. History lives in git and docs/archive/. Anything
+     that must stay true after the next session belongs in docs/plan.md, not here.
+     The Deferred section is the one part carried forward verbatim on every
+     overwrite — prune an item only when its wake condition fires or the owner
+     closes it. -->
+
+## Last completed
+
+<1–3 bullets grounded in the actual diff / commits / tests — not memory.>
+
+## Current focus
+
+<The current milestone or active task, from docs/plan.md.>
+
+## Next action
+
+<The single next step to pick up — for a new chat or after compaction.>
+
+## Validation
+
+<Commands run this session and their result, or "Not run this session.">
+
+## Watchouts
+
+<Only material gotchas that will bite the next session. Omit if none.>
+
+## Deferred — do not re-raise
+
+<Items the owner knows about and has parked. Hooks and skills suppress anything
+ matching a line here until its wake condition is met. `wake: never` means never.>
+
+- <item> (wake: <condition or never>)

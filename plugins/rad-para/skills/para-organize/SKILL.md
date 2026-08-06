@@ -1,0 +1,226 @@
+---
+name: para-organize
+description: >
+  This skill should be used when the user says "organize my notes", "PARA method", "second brain",
+  "set up PARA", "I'm overwhelmed with files", "productivity system", "knowledge management",
+  "where does this go", "classify this note", "my system is broken", "digital organization",
+  "clean slate", "project list", or wants to build, fix, or maintain a PARA-based knowledge
+  management system. Covers PARA setup, classification, system diagnosis, and review workflows.
+---
+
+# PARA Organization & System Management
+
+Help the user build, maintain, and actively use a Second Brain organized with the PARA method
+and driven by the CODE framework (Capture, Organize, Distill, Express).
+
+## Reference Files
+
+Load these as needed throughout the session -- not all upfront:
+
+- **`references/para_method.md`** -- Complete PARA definitions, rules, movement patterns,
+  tool-specific setup guides (Notion, Obsidian, Apple Notes, Google Drive, plain files),
+  PARA for teams
+- **`references/code_framework.md`** -- CODE steps, capture criteria, 12 Favorite Problems
+  overview, organizing principles, AI-enhanced workflows
+- **`references/workflows.md`** -- Project kickoff/completion checklists, weekly/monthly
+  reviews, quick-start setup, project list audit, digital detox
+- **`references/creative_techniques.md`** -- Intermediate Packets, Archipelago of Ideas,
+  Hemingway Bridge, Dial Down the Scope, Cathedral Effect, flow states
+
+## Related Plugin Skills
+
+For specialized workflows, defer to these dedicated skills when appropriate:
+- **progressive-summarization** -- Applying distillation layers to raw notes
+- **express-workflow** -- Assembling Intermediate Packets into creative output
+- **hemingway-bridge** -- PARA-aware session handoffs (integrates with rad-repo)
+- **twelve-favorite-problems** -- Workshop for identifying capture filter problems
+
+## Workflow Rules
+
+### Conversation Flow
+- Ask **one question per turn**. Wait for the answer before proceeding.
+- When answers are vague, offer 2-3 concrete examples and ask the user to pick or refine.
+- Frame questions so the user understands why the answer matters.
+- Be direct and efficient -- no filler, no flattery.
+- When the user needs to take action, give specific, step-by-step instructions.
+
+### Tone
+- Encouraging but practical. Reduce overwhelm, don't create it.
+- Never make the user feel behind for not having a system yet.
+- Celebrate small wins -- even creating 4 folders is progress.
+
+### Core Principles
+- **Organize for actionability, not by topic.** Never suggest topic-based folders.
+- **Always push toward action.** PARA is a production system, not a filing system.
+- **Information is dynamic.** Items flow between categories. No permanent "right place."
+
+## Entry Point -- Detect Session Type
+
+Determine what the user needs:
+
+> "What brings you here today?
+> 1. **I'm new to PARA** -- set up a Second Brain from scratch
+> 2. **My system is broken** -- diagnose and fix it
+> 3. **Run a specific workflow** -- weekly review, project kickoff, project completion, digital detox
+> 4. **Organize something specific** -- have content/files and don't know where they go
+> 5. **Learn a technique** -- Progressive Summarization, Intermediate Packets, etc.
+> 6. **AI-enhance my system** -- use Codex to supercharge my Second Brain"
+
+Route based on answer:
+- **Option 1:** Quick Start Setup (below)
+- **Option 2:** System Diagnosis (below)
+- **Option 3:** Read the specific workflow from `references/workflows.md`
+- **Option 4:** Classification Flow (below)
+- **Option 5:** Defer to the relevant specialized skill or read reference files
+- **Option 6:** AI-Enhanced Workflows from `references/code_framework.md`
+
+**If the user is pointing Codex at a real folder of files to reorganize** (not just advising
+on an app), use the **Filesystem Reorganization** track below instead of the conversational
+Quick Start -- it touches real files and requires the plan-first safety contract.
+
+## Quick Start Setup (New Users)
+
+### Step 1 -- Tool Selection
+
+Ask which app(s) the user wants to use. Read `references/para_method.md` (Tool-Specific
+Setup Guides section) for platform instructions.
+
+### Step 2 -- The 10-Minute Setup
+
+Walk through immediately:
+
+1. **Archive everything.** Move ALL existing files into a single folder called
+   "Archive [today's date]". Don't sort. Just move.
+2. **Create 4 top-level folders:** Projects, Areas, Resources, Archives
+3. **Mirror these 4 folders** in every tool the user uses.
+4. **List active projects.** Ask: "What are you actively working on that has a specific
+   goal AND a deadline?"
+5. **Promote actionable units out of Areas.** Ask: "For each ongoing responsibility you
+   named, is there a specific, time-bound initiative happening inside it right now?" These
+   (e.g. "2025 Tax Filing" inside Finances, "Onboard [Name]" inside Direct Reports) are
+   Projects -- pull them out into their own folder so they stay visible. Almost every Area
+   hides one or two.
+6. **Create a folder for each project** inside the Projects folder.
+7. **Done.** The system is live.
+
+### Step 3 -- Optional Next Steps
+
+Offer but don't require:
+- **Project List Audit** -- if more than 15 or fewer than 10 projects
+- **12 Favorite Problems Workshop** -- invoke the `twelve-favorite-problems` skill
+- **Weekly Review setup** -- schedule the first one
+- **30-Day Beginner Plan** -- from `references/workflows.md`
+
+## Filesystem Reorganization (Real Files)
+
+Use this track when the user points Codex at an actual directory to reorganize -- not when
+you're only advising on how to set up Notion/Obsidian. This touches real files, so trust is
+everything:
+
+**Do not create, move, rename, or delete any file or folder until you have presented a
+complete written plan and the user has explicitly approved it.**
+
+Say this early and unprompted, before scanning anything:
+
+> "I'll look at your folder and ask a few questions, then show you a complete plan -- every
+> folder I'd create and every file I'd move. You review and change anything before I touch a
+> single file. Nothing gets deleted; existing files move to a dated archive."
+
+### Phase 1 -- Discover (read-only)
+
+1. Ask which folder to organize and get access. List only top-level items (name, type, last
+   modified). Don't recurse -- PARA operates at the top level. Skip system/hidden files and
+   OS folders (Applications, Library, `.config`, etc.).
+2. **Detect existing PARA structure** before assuming a clean slate. Look for `1 Projects`/
+   `Projects`/`Active Projects`/`Reference`/`Inactive`, any two-or-more category names, and
+   added categories (`0 Inbox`, `Templates`, `Someday`). If found, offer three paths and let
+   the user choose -- do **not** default to archive-everything:
+   - **Audit & update** -- keep existing folders, flag miscategorized/stale items, fold in loose files.
+   - **Sort into existing** -- keep what's organized, sort only the loose files.
+   - **Fresh start** -- archive everything and rebuild.
+3. Run the interview (active projects; ongoing areas; **actionable units to promote out of
+   areas**; resource interests). If a Master Prompt / personal-context doc exists, read it and
+   confirm rather than re-ask.
+4. **Classify with content-aware triage.** Open ambiguously-named folders and read
+   headers/filenames. Auto-classify clear cases silently. Resolve ambiguous items now in
+   **small batches of 3-5 multiple-choice questions** so the Phase-2 plan has zero open
+   questions. Edge-case rules: screenshots/images -- never auto-archive; unreadable files --
+   ask, don't guess; no loose files at the root of any category.
+
+### Phase 2 -- Present the Plan (the critical phase)
+
+One readable message, no open questions. Include: (1) the dated archive step, (2) PARA folders
+to create, (3) every project folder with its goal, (4) area/resource folders -- only those
+with files to hold (never create an empty folder), (5) every file retrieved from the archive
+into an active folder. Then ask: "Does this look right? Change anything, or tell me to leave
+items alone. I won't move anything until you say go." Wait for approval; re-present changed
+portions if edited.
+
+### Phase 3 -- Execute (only after approval)
+
+Archive everything to `4 Archives/Archive [date]/`, create top-level folders, create project
+folders, create only the area/resource folders with files and retrieve their files. Then
+report: counts per category, **judgment calls flagged for review** (non-obvious placements),
+and **items that couldn't be placed confidently** (failed moves, still-ambiguous files). Close
+with where the originals are safe.
+
+### Phase 4 -- Output Inventory
+
+Save `PARA-Inventory.md` to the root, listing every Project (with goal + deadline -- these
+live here, not in folder names), Area (standard maintained), Resource, and the archive entry.
+This is the trust-completion artifact the user scans during weekly review.
+
+## System Diagnosis (Broken Systems)
+
+Ask what's going wrong, then map to known failure patterns:
+
+| Symptom | Diagnosis | Cure |
+|---------|-----------|------|
+| Save everything, use nothing | Over-capturing | Tighten capture filter (4 criteria). Install the Express habit. |
+| Folders are a mess | Folder explosion / topic-based | Flatten to 4 folders. Archive and restart. |
+| System went stale | Skipped weekly reviews | Schedule recurring review. Do one now. |
+| More organizing than creating | Over-engineering | Simplify. Remove tags, nested folders, templates. |
+| Notes pile up unprocessed | Inbox permanence | Batch-process 2-3x/week. 15 minutes max. |
+| Projects have no deadlines | False projects | Demote to Areas/Resources/someday. |
+
+For full resets, guide through Digital Detox from `references/workflows.md`.
+
+## Classification Flow
+
+When the user shares content and asks where it goes:
+
+1. **Read the content, don't just guess from the name.** Your biggest advantage over a human
+   sorting by hand: you can open the file. A folder called "Q4" is ambiguous by name -- open
+   it, find a half-finished deck with a deadline, and it's clearly a Project. Peek inside
+   ambiguously-named folders and read headers/first lines before classifying.
+2. **Ask about context** only if still unclear.
+3. **Apply the Three-Question Sorting Test:**
+   - In which **Project** will this be most useful right now?
+   - If none: In which **Area** of responsibility?
+   - If none: Which **Resource** topic?
+   - If none: **Archive** or skip saving entirely.
+4. **Explain reasoning** so the user learns the pattern.
+5. **Remind: items move.** No permanent right place.
+
+## PARA Quick Reference
+
+| Category | Definition | Key Rule | Examples |
+|----------|-----------|----------|---------|
+| **Projects** | Short-term, goal + deadline | Must have both outcome and timeframe | "Publish blog post", "Plan vacation" |
+| **Areas** | Ongoing responsibilities | Never end; maintain a standard | Health, Finances, Direct Reports |
+| **Resources** | Topics of interest | Currently inactive; future reference | Coffee brewing, design inspiration |
+| **Archives** | Inactive items from other three | Cold storage; searchable | Completed projects, ended roles |
+
+### The 10-to-15 Project Rule
+Maintain 10-15 active projects. Fewer risks stalling; more fragments attention.
+
+## Workflow Quick Reference
+
+| Workflow | When | Reference |
+|----------|------|-----------|
+| Project Kickoff | Starting new project | `references/workflows.md` |
+| Project Completion | Finishing/shelving project | `references/workflows.md` |
+| Weekly Review | Every 3-7 days | `references/workflows.md` |
+| Monthly Review | Once a month | `references/workflows.md` |
+| Project List Audit | Overwhelmed or unfocused | `references/workflows.md` |
+| Digital Detox | System feels broken | `references/workflows.md` |

@@ -1,0 +1,42 @@
+{
+  "name": "rad-plan",
+  "version": "7.0.0",
+  "description": "Interview-driven, risk-first implementation planning for Codex with release maps, mechanical linting, adversarial review, rescue, replan, and plan-audit workflows. It plans work and documentation; it does not implement application code.",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-plan",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "keywords": [
+    "planner",
+    "planning",
+    "implementation-plan",
+    "risk-first",
+    "adversarial-review",
+    "plan-lint",
+    "stack-evaluation",
+    "project-rescue",
+    "release-map"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RAD Plan",
+    "shortDescription": "Build, rescue, update, and audit executable project plans.",
+    "longDescription": "RAD Plan runs an evidence-backed discovery interview, creates Now/Next/Later release maps and executable milestone/task plans, mechanically validates plan structure, and uses Codex subagents for stack evaluation and adversarial risk review. It also rescues unclear projects, re-baselines plans from git evidence, and audits existing plans without implementing application code.",
+    "developerName": "RAD",
+    "category": "Productivity",
+    "capabilities": [
+      "Project planning",
+      "Plan validation",
+      "Risk review",
+      "Project rescue"
+    ],
+    "defaultPrompt": [
+      "Create a risk-first implementation plan for this project.",
+      "Rescue this unclear project and rebuild its plan from evidence.",
+      "Review docs/plan.md for mechanical and architectural risks."
+    ]
+  }
+}

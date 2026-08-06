@@ -1,0 +1,36 @@
+{
+  "name": "claude-to-codex-plugin-port",
+  "version": "0.1.0",
+  "description": "Port Claude Code plugins and skills into clean Codex marketplace packages without unsupported hooks or stale Claude runtime assumptions.",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/claude-to-codex-plugin-port",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "skills": "./skills/",
+  "keywords": [
+    "codex",
+    "plugin-porting",
+    "claude-code",
+    "migration",
+    "marketplace",
+    "hooks",
+    "skills"
+  ],
+  "interface": {
+    "displayName": "Claude to Codex Plugin Port",
+    "shortDescription": "Convert Claude Code plugins into clean Codex marketplace packages.",
+    "longDescription": "Audits and ports Claude Code plugins or skills to Codex plugin and skill structure, removing unsupported hooks and replacing Claude-specific behavior with explicit Codex skills, validators, and marketplace metadata.",
+    "developerName": "RAD",
+    "category": "Productivity",
+    "capabilities": [
+      "Plugin migration",
+      "Hook removal",
+      "Codex marketplace validation",
+      "Skill trigger cleanup"
+    ],
+    "defaultPrompt": "Help me port a Claude Code plugin or skill into a clean Codex marketplace package."
+  }
+}

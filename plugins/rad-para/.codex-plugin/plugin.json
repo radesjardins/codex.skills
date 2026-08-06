@@ -1,0 +1,42 @@
+{
+  "name": "rad-para",
+  "version": "1.1.1",
+  "description": "Actively manage a PARA second brain with organization, audits, weekly reviews, progressive summarization, output assembly, session handoffs, and a 12 Favorite Problems capture filter.",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-para",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "keywords": [
+    "para",
+    "second-brain",
+    "knowledge-management",
+    "productivity",
+    "progressive-summarization",
+    "pkm",
+    "tiago-forte"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RAD PARA",
+    "shortDescription": "Organize, audit, review, and use a PARA second brain.",
+    "longDescription": "RAD PARA provides active PARA organization, structural auditing, weekly review briefings, Progressive Summarization, Intermediate Packet assembly, Hemingway Bridge handoffs, and a guided 12 Favorite Problems workshop. A bundled Python validator provides read-only structural checks before any reorganization.",
+    "developerName": "RAD",
+    "category": "Productivity",
+    "capabilities": [
+      "PARA organization",
+      "Second-brain audits",
+      "Weekly reviews",
+      "Knowledge distillation",
+      "Session handoffs"
+    ],
+    "defaultPrompt": [
+      "Help me set up or repair my PARA second brain.",
+      "Audit my PARA folders and explain what needs attention.",
+      "Run a weekly PARA review briefing.",
+      "Apply progressive summarization to these notes."
+    ]
+  }
+}

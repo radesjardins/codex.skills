@@ -1,0 +1,56 @@
+{
+  "name": "radesjardins-codex-skills",
+  "interface": {
+    "displayName": "Ryan's Codex Skills"
+  },
+  "plugins": [
+    {
+      "name": "claude-to-codex-plugin-port",
+      "source": {
+        "source": "local",
+        "path": "./plugins/claude-to-codex-plugin-port"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "rad-plan",
+      "source": {
+        "source": "local",
+        "path": "./plugins/rad-plan"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "rad-repo",
+      "source": {
+        "source": "local",
+        "path": "./plugins/rad-repo"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "rad-para",
+      "source": {
+        "source": "local",
+        "path": "./plugins/rad-para"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

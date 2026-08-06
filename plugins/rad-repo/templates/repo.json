@@ -1,0 +1,16 @@
+{
+  "vocabulary": {
+    "mode": "advisory",
+    "scope": "all"
+  },
+  "validation": {
+    "commands": [],
+    "scopes": {},
+    "allow_empty": false
+  },
+  "shipping": {
+    "large_file_bytes": 5242880,
+    "generated_dirs": [".next", "build", "coverage", "dist", "node_modules", "target", "vendor"],
+    "allow_protected_paths": []
+  }
+}

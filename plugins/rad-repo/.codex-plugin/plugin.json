@@ -1,0 +1,50 @@
+{
+  "name": "rad-repo",
+  "version": "3.0.0+codex.20260710025448",
+  "description": "Scoped repository context, executable validation contracts, safe shipping, active initiatives, handoffs, adoption, and drift alignment for Codex.",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-repo",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "keywords": [
+    "repo-manager",
+    "session-management",
+    "startup",
+    "wrapup",
+    "ship",
+    "adopt",
+    "repo-init",
+    "repo-align",
+    "doc-shelf",
+    "context-stack",
+    "trust-report",
+    "deferred-ledger",
+    "drift-detection",
+    "context-handoff",
+    "agents-md",
+    "pre-ship",
+    "scoped-instructions",
+    "initiatives"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RAD Repo",
+    "shortDescription": "Manage scoped repo context, contracts, handoffs, and safe shipping.",
+    "longDescription": "RAD Repo provides startup orientation, scoped AGENTS.md discovery, executable validation contracts, reviewed pre-ship gates, quick wrapups, greenfield initialization, brownfield adoption, active migration initiatives, and deep documentation alignment.",
+    "developerName": "RAD",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Shell"
+    ],
+    "defaultPrompt": [
+      "Run repo startup and show the next task.",
+      "Set up this repo with the doc model.",
+      "Align this repo's docs with the shelf."
+    ]
+  }
+}
