@@ -4,7 +4,7 @@ A public marketplace of Codex workflow plugins by Ryan DesJardins.
 
 The plugins add written procedures, templates, and small local checks. They help Codex handle work in a repeatable way. Installing this marketplace does not add a hosted service, database, account system, or background worker.
 
-The current catalog has 5 plugins and 25 skills. All packages use the MIT License.
+The current catalog has 6 plugins and 35 skills. All packages use the MIT License.
 
 ## Choose a plugin
 
@@ -15,6 +15,7 @@ The current catalog has 5 plugins and 25 skills. All packages use the MIT Licens
 | [RAD Plan](plugins/rad-plan/) | 7.1.0 | Solo builders and small teams planning one bounded release | Repository-backed planning, rescue, replan, plan review, and a mechanical plan check |
 | [RAD Repo](plugins/rad-repo/) | 3.1.0 | Repositories used across many coding-agent sessions | A small document model, handoffs, local command trust, shipping checks, and an optional code-hotspot review |
 | [RAD PARA](plugins/rad-para/) | 1.1.1 | People who keep notes and projects in a PARA system | PARA setup and review guidance, layered summaries, note-to-output help, handoffs, and a narrow folder scanner |
+| [RAD Coolify](plugins/rad-coolify/) | 2.1.0 | Developers who manage self-hosted Coolify v4 deployments | Deployment guidance, four local validators, a read-only review skill, and optional MCP-backed operations |
 
 ## What is familiar and what is specific
 
@@ -27,6 +28,7 @@ Their value comes from how those practices are joined and limited:
 - RAD Plan resembles other planning assistants and spec templates. It adds bounded repository reading, one maintained plan, outcome coverage, safe recovery fields, rescue and replan paths, plus separate mechanical and judgment checks.
 - RAD Repo uses common repository instructions, handoffs, and Git checks. Its main difference is a small authority model and clone-local approval for repository validation commands.
 - RAD PARA applies established second-brain methods. It puts setup, review, distillation, output assembly, and session continuity in one plugin, with approval required before a real folder reorganization.
+- RAD Coolify combines familiar deployment guidance with four file-based validators. Its review path runs those checks before it judges health endpoints, service relationships, and deployment intent.
 
 ## Important limits
 
@@ -58,6 +60,7 @@ codex plugin add rad-brainstorm@radesjardins-codex-skills
 codex plugin add rad-plan@radesjardins-codex-skills
 codex plugin add rad-repo@radesjardins-codex-skills
 codex plugin add rad-para@radesjardins-codex-skills
+codex plugin add rad-coolify@radesjardins-codex-skills
 ~~~
 
 The plugins do not require each other. RAD Brainstorm, RAD Plan, and RAD Repo mention a companion only when its exact skill is available and the current work needs it. RAD PARA can share a handoff with RAD Repo when both apply.
@@ -69,6 +72,7 @@ The plugins do not require each other. RAD Brainstorm, RAD Plan, and RAD Repo me
 - "Create a full implementation plan from this repository."
 - "Run RAD Repo startup and show the next task."
 - "Audit this PARA folder without changing anything."
+- "Review this project for Coolify deployment risks."
 
 The plugin pages list every skill, its output, and its limits.
 

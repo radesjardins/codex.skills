@@ -1,0 +1,22 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "rad-coolify",
+  "version": "2.1.0",
+  "description": "Plan, review, operate, and troubleshoot self-hosted Coolify v4 deployments with focused skills, local validators, and an optional Coolify MCP server.",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-coolify",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "keywords": [
+    "coolify",
+    "deployment",
+    "self-hosted",
+    "docker",
+    "infrastructure",
+    "mcp",
+    "validators"
+  ]
+}

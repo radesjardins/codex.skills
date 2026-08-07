@@ -1,0 +1,41 @@
+{
+  "name": "rad-coolify",
+  "version": "2.1.0",
+  "description": "Plan, review, operate, and troubleshoot self-hosted Coolify v4 deployments.",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-coolify",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "keywords": [
+    "coolify",
+    "deployment",
+    "self-hosted",
+    "docker",
+    "infrastructure",
+    "mcp",
+    "validators"
+  ],
+  "interface": {
+    "displayName": "RAD Coolify",
+    "shortDescription": "Work with self-hosted Coolify v4 deployments.",
+    "longDescription": "RAD Coolify provides focused guidance for deployment, databases, security, CI/CD, troubleshooting, observability, and infrastructure. It includes four local configuration validators and an optional MCP server for live Coolify operations.",
+    "developerName": "RAD",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Deployment guidance",
+      "Configuration review",
+      "Coolify troubleshooting",
+      "Live Coolify operations"
+    ],
+    "defaultPrompt": [
+      "Review this project for Coolify deployment risks.",
+      "Help me deploy this application to self-hosted Coolify.",
+      "Check the status of my Coolify instance."
+    ]
+  }
+}

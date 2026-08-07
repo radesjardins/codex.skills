@@ -1,0 +1,55 @@
+from __future__ import annotations
+
+import json
+import sys
+import unittest
+from pathlib import Path
+
+
+CONVERTER_ROOT = Path(__file__).resolve().parents[2]
+REPOSITORY_ROOT = CONVERTER_ROOT.parents[1]
+SCRIPTS_DIR = CONVERTER_ROOT / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from audit import PLUGIN_SCHEMA, audit_path
+
+
+class RadCoolifyPackageTests(unittest.TestCase):
+    def test_rad_coolify_is_a_public_codex_agent_plugin(self) -> None:
+        plugin_root = REPOSITORY_ROOT / "plugins" / "rad-coolify"
+        portable = json.loads((plugin_root / "plugin.json").read_text(encoding="utf-8"))
+        codex = json.loads((plugin_root / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
+        portable_mcp = json.loads((plugin_root / "mcp.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(PLUGIN_SCHEMA, portable["$schema"])
+        self.assertEqual("rad-coolify", portable["name"])
+        self.assertEqual("2.1.0", portable["version"])
+        self.assertEqual("MIT", portable["license"])
+        self.assertEqual("rad-coolify", codex["name"])
+        self.assertEqual("./skills/", codex["skills"])
+        self.assertEqual("./.mcp.json", codex["mcpServers"])
+        self.assertEqual("stdio", portable_mcp["mcpServers"]["coolify"]["type"])
+
+        skill_names = {
+            path.parent.name for path in (plugin_root / "skills").glob("*/SKILL.md")
+        }
+        self.assertEqual(10, len(skill_names))
+        self.assertIn("coolify-review", skill_names)
+        for obsolete in (".claude-plugin", "agents", "hooks"):
+            self.assertFalse((plugin_root / obsolete).exists())
+
+        report = audit_path(plugin_root)
+        self.assertTrue(report.conforming, [item.to_dict() for item in report.findings])
+
+        catalogs = [
+            json.loads((REPOSITORY_ROOT / "marketplace.json").read_text(encoding="utf-8")),
+            json.loads((REPOSITORY_ROOT / ".agents" / "plugins" / "marketplace.json").read_text(encoding="utf-8")),
+        ]
+        self.assertEqual(catalogs[0], catalogs[1])
+        entry = next(item for item in catalogs[0]["plugins"] if item["name"] == "rad-coolify")
+        self.assertEqual("./plugins/rad-coolify", entry["source"]["path"])
+
+
+if __name__ == "__main__":
+    unittest.main()
