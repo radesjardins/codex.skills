@@ -1,6 +1,6 @@
 # RAD PARA
 
-RAD PARA helps one person set up, review, and use a PARA-based note system with Codex.
+RAD PARA is an Agent Plugins 1.0.0 package that helps one person set up, review, and use a PARA-based note system with Codex. It can make suggestions and approved local file moves, but it can misclassify notes when context is thin.
 
 It is best suited to folders and Markdown notes that Codex can read. It can also give instructions for tools such as Notion, Obsidian, Apple Notes, or Google Drive, but this plugin does not connect to those services or change their data through an API.
 

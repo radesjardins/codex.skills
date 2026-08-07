@@ -1,7 +1,7 @@
 {
   "name": "rad-brainstorm",
-  "version": "4.1.0",
-  "description": "User-led brainstorming for Codex. It keeps generation separate from evaluation and supports quick sessions, full sessions, problem framing, idea evaluation, and software design.",
+  "version": "4.1.1",
+  "description": "An Agent Plugins 1.0.0 package for solo, text-first brainstorming in Codex. It separates idea generation from evaluation, but it cannot guarantee useful ideas or correct conclusions.",
   "author": {
     "name": "RAD",
     "url": "https://github.com/radesjardins"
@@ -22,8 +22,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "RAD Brainstorm",
-    "shortDescription": "Think first, then build better ideas with Codex.",
-    "longDescription": "RAD Brainstorm is a one-person, text-first thinking partner. It asks for the user's ideas first, labels user, AI, and research contributions, checks for distinct mechanisms, and keeps generation separate from evaluation. It supports quick and full sessions, Five Whys problem framing, structured idea evaluation, and software design. It never implements application code.",
+    "shortDescription": "Solo, text-first brainstorming with clear limits.",
+    "longDescription": "RAD Brainstorm is an Agent Plugins 1.0.0 package with Codex marketplace metadata for one-person, text-first idea work. It asks for the user's ideas first, labels sources, separates generation from evaluation, and supports brainstorming, Five Whys, idea comparison, and software design. It cannot guarantee original ideas or correct causal claims, and it stops before implementation.",
     "developerName": "RAD",
     "category": "Productivity",
     "capabilities": [

@@ -1,6 +1,6 @@
 # RAD Plan
 
-RAD Plan creates and maintains implementation plans for Codex. It is for a solo builder or small team that wants one checked plan without adding a task database or a large set of spec files.
+RAD Plan is an Agent Plugins 1.0.0 package that creates and maintains implementation plans for Codex. It is for a solo builder or small team that wants one checked plan without adding a task database or a large set of spec files. Its checks can find plan defects, but they cannot prove that the planned architecture will work.
 
 The plugin writes planning documents. It does not implement application code.
 

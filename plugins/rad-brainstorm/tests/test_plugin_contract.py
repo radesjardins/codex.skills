@@ -12,7 +12,7 @@ class PluginContractTests(unittest.TestCase):
 
     def test_manifest_and_public_skill_name_match_4_1(self):
         manifest = json.loads(self.read(".codex-plugin/plugin.json"))
-        self.assertEqual("4.1.0", manifest["version"])
+        self.assertEqual("4.1.1", manifest["version"])
         self.assertTrue((PLUGIN_ROOT / "skills" / "software-design" / "SKILL.md").is_file())
         self.assertFalse((PLUGIN_ROOT / "skills" / "design-sprint" / "SKILL.md").exists())
 

@@ -1,7 +1,7 @@
 {
   "name": "rad-coolify",
-  "version": "2.1.1",
-  "description": "Plan, review, operate, and troubleshoot self-hosted Coolify v4 deployments.",
+  "version": "2.1.2",
+  "description": "An Agent Plugins 1.0.0 package for self-hosted Coolify v4 guidance and local checks. Optional live actions need client-specific MCP setup and cannot guarantee a successful deployment.",
   "author": {
     "name": "RAD",
     "url": "https://github.com/radesjardins"
@@ -22,8 +22,8 @@
   ],
   "interface": {
     "displayName": "RAD Coolify",
-    "shortDescription": "Work with self-hosted Coolify v4 deployments.",
-    "longDescription": "RAD Coolify provides focused guidance for deployment, databases, security, CI/CD, troubleshooting, observability, and infrastructure. It includes four local configuration validators and an optional MCP server for live Coolify operations.",
+    "shortDescription": "Review and operate self-hosted Coolify v4 with care.",
+    "longDescription": "RAD Coolify is an Agent Plugins 1.0.0 package with Codex compatibility metadata for self-hosted Coolify v4. Its skills cover deployment, databases, security, CI/CD, troubleshooting, monitoring, and infrastructure. Four local validators use heuristics. Live actions require a separate npm MCP package, Node.js, network access, Coolify credentials, and client support; those actions can change remote resources. The plugin cannot prove a deployment will work, and version-specific guidance can become stale.",
     "developerName": "RAD",
     "category": "Developer Tools",
     "capabilities": [

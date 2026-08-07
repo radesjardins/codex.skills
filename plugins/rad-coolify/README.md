@@ -1,6 +1,6 @@
 # RAD Coolify
 
-RAD Coolify gives Codex procedures and local checks for self-hosted Coolify v4 deployments. It covers deployment setup, databases, security, CI/CD, troubleshooting, monitoring, infrastructure, live operations, and deployment review.
+RAD Coolify is an Agent Plugins 1.0.0 package that gives Codex procedures and local checks for self-hosted Coolify v4 deployments. It covers deployment setup, databases, security, CI/CD, troubleshooting, monitoring, infrastructure, live operations, and deployment review.
 
 It is for developers who manage self-hosted Coolify installations and want guidance near their repository work. It does not replace Coolify documentation, server monitoring, backups, or a staging environment.
 
@@ -41,6 +41,8 @@ If you use a fork or private marketplace, replace `radesjardins-codex-skills` wi
 ## MCP server
 
 The plugin starts [`@radoriginllc/coolify-mcp`](https://www.npmjs.com/package/@radoriginllc/coolify-mcp) as a local stdio MCP process through `npx`. That package calls the Coolify REST API. It includes read and write tools for applications, deployments, environment variables, databases, services, and other resources.
+
+This MCP setup is client-specific. Agent Plugins 1.0.0 has no portable secret field, so another compatible client may need its own secure credential mapping or MCP configuration. Portable package conformance alone does not make live operations available.
 
 This is separate from [Coolify's built-in `/mcp` endpoint](https://coolify.io/docs/integrations/mcp). Coolify currently documents its built-in endpoint as read-only. RAD Coolify does not configure that endpoint.
 
@@ -171,4 +173,3 @@ The `coolify-status` and `coolify-review` skills are read-only. Other skills can
 ## License
 
 MIT. See [LICENSE](LICENSE).
-

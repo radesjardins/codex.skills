@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "rad-repo",
-  "version": "3.2.0",
-  "description": "Small repository context, trusted validation contracts, handoffs, safe shipping, opt-in release verification, and code hotspot review for Codex.",
+  "version": "3.2.1",
+  "description": "An Agent Plugins 1.0.0 package for repository context, handoffs, approved checks, and guarded Git shipping in Codex. Its opinionated model and heuristics cannot prove code or production health.",
   "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-repo",
   "repository": "https://github.com/radesjardins/codex.skills",
   "license": "MIT",

@@ -1,6 +1,6 @@
 # RAD Plugin Converter
 
-RAD Plugin Converter creates, audits, and converts plugin packages for Agent Plugins 1.0.0. Its publish skill guides reviewed marketplace, Git, client, and agent-visible release work.
+RAD Plugin Converter is itself an Agent Plugins 1.0.0 package. It creates, audits, and converts other plugin packages for that standard. Its publish skill guides reviewed marketplace, Git, client, and agent-visible release work. Local conformance checks cannot prove that every client-specific feature will run.
 
 It is for plugin authors who need to move a Claude Code, Codex, mixed, legacy, or standalone Agent Skill package toward the portable format. It does not convert an ordinary application repository into a plugin.
 

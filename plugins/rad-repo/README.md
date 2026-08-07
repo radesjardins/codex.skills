@@ -1,6 +1,6 @@
 # RAD Repo
 
-RAD Repo helps Codex keep a repository understandable between sessions. It uses a small document model, an evidence-based handoff, repository-declared checks, and a guarded Git shipping flow.
+RAD Repo is an Agent Plugins 1.0.0 package that helps Codex keep a repository understandable between sessions. It uses an opinionated document model, an evidence-based handoff, repository-declared checks, and a guarded Git shipping flow. Its scans can find review targets, but they cannot prove code quality or production health.
 
 It is for one person or a small team that works with coding agents over many sessions. It can also bring an older repository into the model without erasing useful local documents.
 

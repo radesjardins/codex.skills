@@ -1,6 +1,6 @@
 # RAD Brainstorm
 
-RAD Brainstorm is a text-based thinking plugin for one person working with Codex. It helps the user frame a question, create or compare ideas, and choose a small way to test the leading option.
+RAD Brainstorm is an Agent Plugins 1.0.0 package for one-person, text-based idea work with Codex. It helps the user frame a question, create or compare ideas, and choose a small way to test the leading option. It cannot guarantee useful ideas or correct conclusions.
 
 It is a good fit when normal chat feels too loose and a full product discovery process would be too much.
 

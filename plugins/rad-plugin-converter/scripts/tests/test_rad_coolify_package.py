@@ -24,7 +24,7 @@ class RadCoolifyPackageTests(unittest.TestCase):
 
         self.assertEqual(PLUGIN_SCHEMA, portable["$schema"])
         self.assertEqual("rad-coolify", portable["name"])
-        self.assertEqual("2.1.1", portable["version"])
+        self.assertEqual("2.1.2", portable["version"])
         self.assertEqual("MIT", portable["license"])
         self.assertEqual("rad-coolify", codex["name"])
         self.assertEqual("./skills/", codex["skills"])

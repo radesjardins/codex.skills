@@ -1,7 +1,7 @@
 {
   "name": "rad-para",
-  "version": "1.1.1",
-  "description": "Actively manage a PARA second brain with organization, audits, weekly reviews, progressive summarization, output assembly, session handoffs, and a 12 Favorite Problems capture filter.",
+  "version": "1.1.2",
+  "description": "An Agent Plugins 1.0.0 package for one-person PARA organization, reviews, summaries, and handoffs. It has no sync service or app connector and can misclassify sparse notes.",
   "author": {
     "name": "RAD",
     "url": "https://github.com/radesjardins"
@@ -21,8 +21,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "RAD PARA",
-    "shortDescription": "Organize, audit, review, and use a PARA second brain.",
-    "longDescription": "RAD PARA provides active PARA organization, structural auditing, weekly review briefings, Progressive Summarization, Intermediate Packet assembly, Hemingway Bridge handoffs, and a guided 12 Favorite Problems workshop. A bundled Python validator provides read-only structural checks before any reorganization.",
+    "shortDescription": "Review and organize a local PARA note system.",
+    "longDescription": "RAD PARA is an Agent Plugins 1.0.0 package with Codex marketplace metadata for one-person PARA work. It provides organization guidance, read-only structural audits, weekly reviews, Progressive Summarization, output assembly, session handoffs, and a 12 Favorite Problems workshop. File moves require an approved plan. It has no sync engine, scheduler, or live app connector, and thin context can lead to wrong classifications.",
     "developerName": "RAD",
     "category": "Productivity",
     "capabilities": [

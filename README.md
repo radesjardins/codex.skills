@@ -1,21 +1,21 @@
 # Ryan's Codex Skills
 
-A public marketplace of Codex workflow plugins by Ryan DesJardins.
+A small public marketplace for solo developers and vibe coders who want clearer work from Codex without adding a project-management system.
 
-The plugins add written procedures, templates, and small local checks. They help Codex handle work in a repeatable way. Installing this marketplace does not add a hosted service, database, account system, or background worker.
+The plugins add written procedures, templates, and local checks. They can make agent work more consistent, but they do not make Codex infallible or replace review, tests, backups, or product judgment. Installing this marketplace does not add a hosted service, database, account system, or background worker.
 
-The current catalog has 6 plugins and 35 skills. All packages use the MIT License.
+The current catalog has 6 plugins and 38 skills. Each plugin targets the Agent Plugins 1.0.0 working draft and includes Codex compatibility metadata. Agent Plugins standardizes the portable package layout for skills and MCP servers. It does not standardize marketplace installation, permissions, secrets, or client-specific user interfaces. All packages use the MIT License.
 
 ## Choose a plugin
 
 | Plugin | Version | Best fit | What it adds |
 | --- | ---: | --- | --- |
-| [RAD Plugin Converter](plugins/rad-plugin-converter/) | 1.1.0 | Authors creating, auditing, or converting plugin packages | A standards-based creator, read-only audit, and deterministic converter for Agent Plugins 1.0.0 |
-| [RAD Brainstorm](plugins/rad-brainstorm/) | 4.1.0 | One person who wants guided idea work before planning | User-first ideation, separate evaluation, idea-source labels, and a small proof step |
-| [RAD Plan](plugins/rad-plan/) | 7.1.0 | Solo builders and small teams planning one bounded release | Repository-backed planning, rescue, replan, plan review, and a mechanical plan check |
-| [RAD Repo](plugins/rad-repo/) | 3.1.0 | Repositories used across many coding-agent sessions | A small document model, handoffs, local command trust, shipping checks, and an optional code-hotspot review |
-| [RAD PARA](plugins/rad-para/) | 1.1.1 | People who keep notes and projects in a PARA system | PARA setup and review guidance, layered summaries, note-to-output help, handoffs, and a narrow folder scanner |
-| [RAD Coolify](plugins/rad-coolify/) | 2.1.0 | Developers who manage self-hosted Coolify v4 deployments | Deployment guidance, four local validators, a read-only review skill, and optional MCP-backed operations |
+| [RAD Plugin Converter](plugins/rad-plugin-converter/) | 1.2.3 | Authors creating, auditing, or converting plugin packages | Local Agent Plugins 1.0.0 checks, safe conversions, and a reviewed publishing workflow; author review is still required |
+| [RAD Brainstorm](plugins/rad-brainstorm/) | 4.1.1 | One person who wants guided idea work before planning | Text-first ideation, separate evaluation, source labels, and a small proof step; no shared canvas or guarantee of good ideas |
+| [RAD Plan](plugins/rad-plan/) | 7.1.1 | Solo builders and small teams planning one bounded release | Repository-backed planning, rescue, replan, and plan review; it writes plans and does not implement code |
+| [RAD Repo](plugins/rad-repo/) | 3.2.1 | Repositories used across many coding-agent sessions | An opinionated document model, handoffs, approved checks, and guarded Git shipping; checks cannot prove production health |
+| [RAD PARA](plugins/rad-para/) | 1.1.2 | People who keep local notes and projects in a PARA system | PARA guidance, read-only audits, layered summaries, output help, and approved file moves; no sync service or app connector |
+| [RAD Coolify](plugins/rad-coolify/) | 2.1.2 | Developers who manage self-hosted Coolify v4 deployments | Deployment guidance and local validators, plus optional client-specific MCP actions that need separate setup and credentials |
 
 ## What is familiar and what is specific
 
@@ -23,16 +23,18 @@ These plugins use known practices. They do not claim to invent PARA, Five Whys, 
 
 Their value comes from how those practices are joined and limited:
 
-- RAD Plugin Converter creates new dual-format packages and uses a standard migration inventory for existing packages. It keeps portable metadata separate from client files and checks skill and MCP configuration before writing changes.
+- RAD Plugin Converter creates new dual-format packages and uses a standard migration inventory for existing packages. It keeps portable metadata separate from client files and checks skill and MCP configuration before writing changes. Its local checks catch format errors, not every runtime or client issue.
 - RAD Brainstorm uses familiar idea methods. Its specific focus is idea ownership: the user starts, each contribution has a source label, judgment happens later, and the result ends with a test threshold and stop signal.
 - RAD Plan resembles other planning assistants and spec templates. It adds bounded repository reading, one maintained plan, outcome coverage, safe recovery fields, rescue and replan paths, plus separate mechanical and judgment checks.
 - RAD Repo uses common repository instructions, handoffs, and Git checks. Its main difference is a small authority model and clone-local approval for repository validation commands.
 - RAD PARA applies established second-brain methods. It puts setup, review, distillation, output assembly, and session continuity in one plugin, with approval required before a real folder reorganization.
-- RAD Coolify combines familiar deployment guidance with four file-based validators. Its review path runs those checks before it judges health endpoints, service relationships, and deployment intent.
+- RAD Coolify combines familiar deployment guidance with four file-based validators. Its review path runs those checks before it judges health endpoints, service relationships, and deployment intent. Live actions depend on a separate npm MCP package and client-managed credentials.
 
 ## Important limits
 
 Skills are instructions for an AI agent. They can improve consistency, but they cannot guarantee a correct plan, diagnosis, design, file placement, or release.
+
+Agent Plugins 1.0.0 is still a working draft. These packages follow its current layout, but portable packaging does not mean that every client supports every skill, MCP server, or Codex-specific feature.
 
 The bundled scanners use rules and heuristics. Their findings are evidence to review. They are not proof of code quality, document meaning, or personal productivity.
 
