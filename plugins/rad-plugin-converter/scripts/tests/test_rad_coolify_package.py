@@ -50,6 +50,26 @@ class RadCoolifyPackageTests(unittest.TestCase):
         entry = next(item for item in catalogs[0]["plugins"] if item["name"] == "rad-coolify")
         self.assertEqual("./plugins/rad-coolify", entry["source"]["path"])
 
+    def test_rad_coolify_readme_explains_safe_mcp_setup(self) -> None:
+        readme = (
+            REPOSITORY_ROOT / "plugins" / "rad-coolify" / "README.md"
+        ).read_text(encoding="utf-8")
+
+        required_text = (
+            "Security > API Tokens",
+            "COOLIFY_URL",
+            "COOLIFY_API_TOKEN",
+            "SetEnvironmentVariable",
+            "read:sensitive",
+            "https://coolify.io/docs/api-reference/authorization",
+            "codex plugin add rad-coolify@radesjardins-codex-skills",
+            "Node.js 18",
+            "/api/v1",
+            "/mcp",
+        )
+        for text in required_text:
+            self.assertIn(text, readme)
+
 
 if __name__ == "__main__":
     unittest.main()
