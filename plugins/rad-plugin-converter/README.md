@@ -1,6 +1,6 @@
 # RAD Plugin Converter
 
-RAD Plugin Converter audits and converts plugin packages for Agent Plugins 1.0.0.
+RAD Plugin Converter creates, audits, and converts plugin packages for Agent Plugins 1.0.0.
 
 It is for plugin authors who need to move a Claude Code, Codex, mixed, legacy, or standalone Agent Skill package toward the portable format. It does not convert an ordinary application repository into a plugin.
 
@@ -10,6 +10,7 @@ The Agent Plugins 1.0.0 specification is a working draft. This package pins its 
 
 | Skill | Use it for | Result |
 | --- | --- | --- |
+| `create-plugin` | A new standards-based plugin | Portable and Codex manifests plus an optional starter skill |
 | `audit-plugin` | A read-only conformance check | Detected formats, errors, warnings, client-only files, and smallest safe fixes |
 | `convert-plugin` | A requested migration | An additive portable manifest, safe Agent Skill fixes, and a validation report |
 
@@ -32,6 +33,7 @@ The converter can infer `stdio` for a legacy MCP entry with an executable comman
 ## Local commands
 
 ```powershell
+python .\scripts\rad_plugin_converter.py create <plugin-name> --target <new-package-root> --description "<purpose>" --author "<publisher>" --json
 python .\scripts\rad_plugin_converter.py audit <package-root> --json
 python .\scripts\rad_plugin_converter.py convert <package-root> --in-place --json
 python .\scripts\rad_plugin_converter.py convert <claude-source> --target <new-package-root> --json

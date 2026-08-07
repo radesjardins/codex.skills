@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Sequence
 
 from audit import audit_path
-from convert import convert_in_place, convert_marketplace, convert_to_target
+from convert import create_plugin, convert_in_place, convert_marketplace, convert_to_target
 from models import AuditReport, ConversionResult
 
 
@@ -58,6 +58,17 @@ def _parser() -> argparse.ArgumentParser:
     audit_parser.add_argument("path", type=Path)
     audit_parser.add_argument("--json", action="store_true", help="Emit JSON output.")
 
+    create_parser = commands.add_parser("create", help="Create a new Agent Plugins 1.0.0 package.")
+    create_parser.add_argument("name")
+    create_parser.add_argument("--target", type=Path, required=True, help="New plugin directory.")
+    create_parser.add_argument("--description", required=True)
+    create_parser.add_argument("--author", required=True)
+    create_parser.add_argument("--version", default="0.1.0")
+    create_parser.add_argument("--license", dest="license_id", default="MIT")
+    create_parser.add_argument("--skill", dest="skill_name")
+    create_parser.add_argument("--skill-description")
+    create_parser.add_argument("--json", action="store_true", help="Emit JSON output.")
+
     convert_parser = commands.add_parser("convert", help="Convert one plugin or Agent Skill.")
     convert_parser.add_argument("path", type=Path)
     mode = convert_parser.add_mutually_exclusive_group(required=True)
@@ -78,6 +89,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         report = audit_path(args.path)
         _print_audit(report, args.json)
         return 0 if report.conforming else 1
+    if args.command == "create":
+        result = create_plugin(
+            args.target,
+            name=args.name,
+            description=args.description,
+            author=args.author,
+            version=args.version,
+            license_id=args.license_id,
+            skill_name=args.skill_name,
+            skill_description=args.skill_description,
+        )
+        _print_conversion(result, args.json)
+        return 0 if result.successful else 1
     if args.command == "convert":
         result = convert_in_place(args.path) if args.in_place else convert_to_target(args.path, args.target)
         _print_conversion(result, args.json)

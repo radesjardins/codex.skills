@@ -76,6 +76,32 @@ class CliTests(unittest.TestCase):
         self.assertIsInstance(output, list)
         self.assertEqual("sample", output[0]["root"].replace("\\", "/").rsplit("/", 1)[-1])
 
+    def test_create_command_writes_a_conforming_plugin(self) -> None:
+        target = Path(self.temp_dir.name) / "created-plugin"
+
+        result = self.run_cli(
+            "create",
+            "created-plugin",
+            "--target",
+            str(target),
+            "--description",
+            "Create sample output.",
+            "--author",
+            "RAD",
+            "--skill",
+            "create-sample",
+            "--skill-description",
+            "Use when creating a sample.",
+            "--json",
+        )
+        output = json.loads(result.stdout)
+        portable = json.loads((target / "plugin.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertTrue(output["successful"])
+        self.assertEqual("created-plugin", portable["name"])
+        self.assertTrue((target / "skills" / "create-sample" / "SKILL.md").is_file())
+
 
 if __name__ == "__main__":
     unittest.main()

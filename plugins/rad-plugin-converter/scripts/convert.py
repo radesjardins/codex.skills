@@ -15,7 +15,7 @@ from audit import (
     PLUGIN_SCHEMA,
     audit_path,
 )
-from frontmatter import audit_frontmatter, repair_skill_name
+from frontmatter import SKILL_NAME_RE, audit_frontmatter, repair_skill_name
 from models import ConversionResult, Finding
 
 
@@ -257,6 +257,136 @@ def _repair_skills(root: Path) -> list[str]:
         if "skill-name-mismatch" in codes and repair_skill_name(skill_dir):
             changed.append(_relative(skill_path, root))
     return changed
+
+
+def _display_name(name: str) -> str:
+    return " ".join(part.capitalize() for part in name.replace(".", "-").split("-") if part)
+
+
+def create_plugin(
+    path: Path,
+    *,
+    name: str,
+    description: str,
+    author: str,
+    version: str = "0.1.0",
+    license_id: str = "MIT",
+    skill_name: str | None = None,
+    skill_description: str | None = None,
+) -> ConversionResult:
+    root = path.resolve(strict=False)
+    if root.exists() and (not root.is_dir() or any(root.iterdir())):
+        return ConversionResult(
+            root=root,
+            findings=[
+                Finding(
+                    "error",
+                    "creation-target-not-empty",
+                    str(root),
+                    "Creation target must be absent or an empty directory.",
+                )
+            ],
+        )
+    if not PLUGIN_NAME_RE.fullmatch(name) or not (1 <= len(name) <= 64):
+        return ConversionResult(
+            root=root,
+            findings=[Finding("error", "creation-plugin-name", ".", "Plugin name is invalid.")],
+        )
+    if not description.strip() or not author.strip() or not version.strip() or not license_id.strip():
+        return ConversionResult(
+            root=root,
+            findings=[
+                Finding(
+                    "error",
+                    "creation-metadata",
+                    ".",
+                    "Description, author, version, and license must be non-empty.",
+                )
+            ],
+        )
+    if (skill_name is None) != (skill_description is None):
+        return ConversionResult(
+            root=root,
+            findings=[
+                Finding(
+                    "error",
+                    "creation-skill-metadata",
+                    ".",
+                    "Skill name and skill description must be supplied together.",
+                )
+            ],
+        )
+    if skill_name is not None and (
+        not SKILL_NAME_RE.fullmatch(skill_name)
+        or skill_description is None
+        or not skill_description.strip()
+    ):
+        return ConversionResult(
+            root=root,
+            findings=[
+                Finding(
+                    "error",
+                    "creation-skill-metadata",
+                    ".",
+                    "Starter skill name or description is invalid.",
+                )
+            ],
+        )
+
+    display_name = _display_name(name)
+    portable: dict[str, Any] = {
+        "$schema": PLUGIN_SCHEMA,
+        "name": name,
+        "version": version,
+        "description": description,
+        "author": {"name": author},
+        "license": license_id,
+    }
+    codex: dict[str, Any] = {
+        "name": name,
+        "version": version,
+        "description": description,
+        "author": {"name": author},
+        "license": license_id,
+        "interface": {
+            "displayName": display_name,
+            "shortDescription": description,
+            "longDescription": description,
+            "developerName": author,
+            "category": "Productivity",
+            "capabilities": ["Agent Plugins 1.0.0 package"],
+            "defaultPrompt": [f"Help me use {display_name}."],
+        },
+    }
+    if skill_name is not None:
+        codex["skills"] = "./skills/"
+
+    changed: list[str] = []
+    try:
+        if _atomic_write_json(root / "plugin.json", portable):
+            changed.append("plugin.json")
+        if _atomic_write_json(root / ".codex-plugin" / "plugin.json", codex):
+            changed.append(".codex-plugin/plugin.json")
+        if skill_name is not None and skill_description is not None:
+            skill_text = (
+                "---\n"
+                f"name: {skill_name}\n"
+                f"description: {json.dumps(skill_description, ensure_ascii=False)}\n"
+                "---\n\n"
+                f"# {_display_name(skill_name)}\n"
+            )
+            skill_path = root / "skills" / skill_name / "SKILL.md"
+            if _atomic_write_text(skill_path, skill_text):
+                changed.append(_relative(skill_path, root))
+    except OSError as exc:
+        return ConversionResult(
+            root=root,
+            changed_files=changed,
+            findings=[Finding("error", "creation-write", ".", str(exc))],
+        )
+
+    report = audit_path(root)
+    return ConversionResult(root=root, changed_files=changed, findings=report.findings)
 
 
 def convert_in_place(path: Path) -> ConversionResult:

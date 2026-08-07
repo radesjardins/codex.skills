@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Agent Plugin"
+  short_description: "Create a new Agent Plugins 1.0.0 package."
+  default_prompt: "Create a new standards-compliant Agent Plugin package."

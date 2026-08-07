@@ -1,7 +1,7 @@
 {
   "name": "rad-plugin-converter",
-  "version": "1.0.0",
-  "description": "Audit and convert Claude Code, Codex, legacy, and mixed plugin packages to Agent Plugins 1.0.0.",
+  "version": "1.1.0",
+  "description": "Create, audit, and convert plugin packages for Agent Plugins 1.0.0.",
   "author": {
     "name": "RAD",
     "url": "https://github.com/radesjardins"
@@ -20,20 +20,21 @@
   ],
   "interface": {
     "displayName": "RAD Plugin Converter",
-    "shortDescription": "Audit and convert plugin packages to Agent Plugins 1.0.0.",
-    "longDescription": "RAD Plugin Converter audits Claude Code, Codex, legacy, and mixed plugin packages. It creates a portable Agent Plugins manifest while retaining documented client compatibility files. It can also check and safely repair Agent Skills metadata.",
+    "shortDescription": "Create, audit, and convert Agent Plugins 1.0.0 packages.",
+    "longDescription": "RAD Plugin Converter creates new dual-format packages, audits Claude Code, Codex, legacy, and mixed plugin packages, and converts existing packages while retaining documented client compatibility files.",
     "developerName": "RAD",
     "category": "Productivity",
     "capabilities": [
       "Plugin audits",
+      "Plugin creation",
       "Plugin conversion",
       "Agent Skills validation",
       "MCP configuration checks"
     ],
     "defaultPrompt": [
+      "Create a new Agent Plugins 1.0.0 package.",
       "Audit this plugin for Agent Plugins 1.0.0 conformance.",
-      "Convert this Codex plugin to Agent Plugins 1.0.0 in place.",
-      "Convert this Claude Code plugin into a separate Agent Plugins package."
+      "Convert this Codex plugin to Agent Plugins 1.0.0 in place."
     ]
   }
 }
