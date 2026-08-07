@@ -1,6 +1,6 @@
 # RAD Plugin Converter
 
-RAD Plugin Converter creates, audits, and converts plugin packages for Agent Plugins 1.0.0.
+RAD Plugin Converter creates, audits, converts, publishes, and compares plugin packages for Agent Plugins 1.0.0.
 
 It is for plugin authors who need to move a Claude Code, Codex, mixed, legacy, or standalone Agent Skill package toward the portable format. It does not convert an ordinary application repository into a plugin.
 
@@ -13,6 +13,7 @@ The Agent Plugins 1.0.0 specification is a working draft. This package pins its 
 | `create-plugin` | A new standards-based plugin | Portable and Codex manifests plus an optional starter skill |
 | `audit-plugin` | A read-only conformance check | Detected formats, errors, warnings, client-only files, and smallest safe fixes |
 | `convert-plugin` | A requested migration | An additive portable manifest, safe Agent Skill fixes, and a validation report |
+| `publish-plugin` | A reviewed marketplace release | Package, Git, client, and agent-visible publish gates |
 
 ## What it checks
 
@@ -39,16 +40,19 @@ python .\scripts\rad_plugin_converter.py convert <package-root> --in-place --jso
 python .\scripts\rad_plugin_converter.py convert <claude-source> --target <new-package-root> --json
 python .\scripts\rad_plugin_converter.py marketplace <marketplace-root> --json
 python .\scripts\rad_plugin_converter.py marketplace <marketplace-root> --apply --json
+python .\scripts\rad_plugin_converter.py sync-check <left-marketplace> <right-marketplace> --json
 ```
 
 `marketplace` is read-only unless `--apply` is present. The tool does not make network calls.
+
+`sync-check` is always read-only. It compares only packages that already exist in both marketplace roots. Packages unique to either side are reported without failing the check or copying files.
 
 ## Limits
 
 - The checks are local package checks. They do not prove every supported client will run each client-specific feature.
 - The converter preserves documented client compatibility files. It does not invent a client extension namespace.
 - It repairs a skill name only when the directory name is valid and the repair is safe. Missing or misleading descriptions need an author review.
-- Publishing, installing, removing old marketplace entries, committing, and pushing happen only when the user requests them.
+- Publishing, installing, removing old marketplace entries, committing, and pushing follow the exact authorization gates in `publish-plugin`.
 
 ## Install
 

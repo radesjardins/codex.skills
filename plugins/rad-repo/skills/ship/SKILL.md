@@ -5,9 +5,8 @@ description: >
   push", "wrap and ship", "send it", "commit and push everything", or "end the
   session and push". It refreshes the handoff, stages reviewed paths, checks the
   local repository contract, runs approved validation, commits, pushes, and reports
-  the exact state. Normal ship stops after push. "Ship and verify deploy" adds one
-  bounded deployment check with no polling loop. Invoking ship authorizes commit and
-  push. It does not authorize a force-push, merge, deploy action, or deletion.
+  the exact state. Ship stops after push. Invoking ship authorizes commit and push.
+  It does not authorize a force-push, merge, deploy action, or deletion.
 allowed-tools: Read Glob Grep Bash Write Edit AskUserQuestion
 ---
 
@@ -77,15 +76,7 @@ Create a conventional commit message from the staged diff. Use the user's messag
 
 Push the current branch. If it is not `main`, state the branch name. Stop on a rejected push. Never force-push, merge, or switch branches without a separate request.
 
-## 7. Optional deploy check
-
-Skip deployment checks during normal ship.
-
-Run one check only when the original request includes `ship and verify deploy`, `check deploy after ship`, or an equally clear request. Read the declared `deploy:` target. Use one available read-only status or health check. Do not poll, wait for completion, restart a service, or start a deploy.
-
-If the deployment is still running, report `running` and stop. If no read-only tool is available, report `unverified` and stop.
-
-## 8. Report local leftovers
+## 7. Report local leftovers
 
 List merged local branches and worktrees. Do not delete them without a separate owner approval.
 
@@ -95,9 +86,8 @@ List merged local branches and worktrees. Do not delete them without a separate 
 Shipped: <commit> pushed to <remote/branch>
 Handoff: <fresh / size note>
 Validation: <commands and result>
-Deploy: <not requested / live / failed / running / unverified>
 Working tree: <clean / remaining paths>
 Local leftovers: <count>
 ```
 
-Stop after this report. First-use fit-out belongs in `adopt` or an explicit fit-out request. It never runs inside ship.
+Stop after this report. Release verification belongs in the separate `verify-release` skill and runs only when the user explicitly asks for it. First-use fit-out belongs in `adopt` or an explicit fit-out request. It never runs inside ship.

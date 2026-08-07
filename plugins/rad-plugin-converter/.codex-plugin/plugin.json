@@ -1,7 +1,7 @@
 {
   "name": "rad-plugin-converter",
-  "version": "1.1.0",
-  "description": "Create, audit, and convert plugin packages for Agent Plugins 1.0.0.",
+  "version": "1.2.0",
+  "description": "Create, audit, convert, publish, and compare plugin packages for Agent Plugins 1.0.0.",
   "author": {
     "name": "RAD",
     "url": "https://github.com/radesjardins"
@@ -16,25 +16,30 @@
     "claude-code",
     "codex",
     "plugin-conversion",
+    "plugin-publishing",
+    "marketplace-sync",
     "migration"
   ],
   "interface": {
     "displayName": "RAD Plugin Converter",
-    "shortDescription": "Create, audit, and convert Agent Plugins 1.0.0 packages.",
-    "longDescription": "RAD Plugin Converter creates new dual-format packages, audits Claude Code, Codex, legacy, and mixed plugin packages, and converts existing packages while retaining documented client compatibility files.",
+    "shortDescription": "Create, audit, publish, and compare Agent Plugins packages.",
+    "longDescription": "RAD Plugin Converter creates new dual-format packages, audits and converts existing packages, guides reviewed marketplace publishing, and compares shared packages across local marketplaces without copying unique packages.",
     "developerName": "RAD",
     "category": "Productivity",
     "capabilities": [
       "Plugin audits",
       "Plugin creation",
       "Plugin conversion",
+      "Plugin publishing",
+      "Marketplace sync checks",
       "Agent Skills validation",
       "MCP configuration checks"
     ],
     "defaultPrompt": [
       "Create a new Agent Plugins 1.0.0 package.",
       "Audit this plugin for Agent Plugins 1.0.0 conformance.",
-      "Convert this Codex plugin to Agent Plugins 1.0.0 in place."
+      "Convert this Codex plugin to Agent Plugins 1.0.0 in place.",
+      "Publish this reviewed plugin into the selected marketplace."
     ]
   }
 }

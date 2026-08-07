@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify Release"
+  short_description: "Prove a pushed revision is live in production"
+  default_prompt: "Use $verify-release to verify that the pushed revision is live in production."

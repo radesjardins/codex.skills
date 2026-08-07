@@ -11,6 +11,7 @@ It is for one person or a small team that works with coding agents over many ses
 | [rad-repo:startup](skills/startup/SKILL.md) | Starting a work session in a managed repository | A read-only briefing with Git state, document trust, current focus, and one next task |
 | [rad-repo:wrapup](skills/wrapup/SKILL.md) | Stopping work without losing the exact resume point | An updated docs/handoff.md and a closure report |
 | [rad-repo:ship](skills/ship/SKILL.md) | Reviewing, checking, committing, and pushing the intended work | A pushed commit or a clear blocked result |
+| [rad-repo:verify-release](skills/verify-release/SKILL.md) | Checking whether a pushed revision reached production | A bounded, read-only LIVE, FAILED, RUNNING, or UNVERIFIED result |
 | [rad-repo:doctor](skills/doctor/SKILL.md) | Explaining missing or untrusted repository validation | A read-only report of command sources, path scopes, approval state, and plugin resources |
 | [rad-repo:complexity-audit](skills/complexity-audit/SKILL.md) | Finding code areas that deserve maintenance review | Five to ten ranked hotspots with evidence, risk, and test needs |
 | [rad-repo:repo-init](skills/repo-init/SKILL.md) | Adding the minimum document container to a new repository | AGENTS.md, docs/handoff.md, and docs/archive without invented product content |
@@ -49,7 +50,7 @@ The pre-ship gate checks staged Git content for:
 - missing or unapproved validation commands;
 - failed validation commands.
 
-Ship stages reviewed paths. It does not use git add -A. A normal ship stops after push. A request to ship and verify deploy adds one read-only deploy check and no polling loop.
+Ship stages reviewed paths. It does not use git add -A, and it stops after push. Release verification is a separate opt-in skill, so deployment waiting does not extend the shipping workflow.
 
 ## What is specific about it
 
@@ -65,6 +66,7 @@ RAD Repo also keeps code-hotspot review separate from routine work. The complexi
 - Wrapup updates the handoff. Normal wrapup does not commit. Wrapup and commit creates one local documentation commit.
 - Adopt and repo-align show document moves and judgment-based edits before applying them.
 - Ship authorizes a normal commit and push for the reviewed work. It does not authorize force-push, merge, deployment, deletion, or branch switching.
+- Verify-release is read-only. It does not trigger, retry, restart, cancel, promote, or roll back a deployment.
 - User-owned instruction text is preserved unless the owner approves a specific rewrite.
 
 ## Limits

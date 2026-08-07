@@ -1,0 +1,4 @@
+interface:
+  display_name: "Publish Plugin"
+  short_description: "Publish and verify a reviewed plugin package"
+  default_prompt: "Use $publish-plugin to publish this reviewed plugin into the selected marketplace."
