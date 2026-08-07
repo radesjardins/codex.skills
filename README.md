@@ -10,7 +10,7 @@ The current catalog has 6 plugins and 35 skills. All packages use the MIT Licens
 
 | Plugin | Version | Best fit | What it adds |
 | --- | ---: | --- | --- |
-| [RAD Plugin Converter](plugins/rad-plugin-converter/) | 1.0.0 | Authors auditing or converting Claude Code, Codex, mixed, or older plugin packages | A read-only standards audit and a deterministic converter for the Agent Plugins 1.0.0 Working Draft |
+| [RAD Plugin Converter](plugins/rad-plugin-converter/) | 1.1.0 | Authors creating, auditing, or converting plugin packages | A standards-based creator, read-only audit, and deterministic converter for Agent Plugins 1.0.0 |
 | [RAD Brainstorm](plugins/rad-brainstorm/) | 4.1.0 | One person who wants guided idea work before planning | User-first ideation, separate evaluation, idea-source labels, and a small proof step |
 | [RAD Plan](plugins/rad-plan/) | 7.1.0 | Solo builders and small teams planning one bounded release | Repository-backed planning, rescue, replan, plan review, and a mechanical plan check |
 | [RAD Repo](plugins/rad-repo/) | 3.1.0 | Repositories used across many coding-agent sessions | A small document model, handoffs, local command trust, shipping checks, and an optional code-hotspot review |
@@ -23,7 +23,7 @@ These plugins use known practices. They do not claim to invent PARA, Five Whys, 
 
 Their value comes from how those practices are joined and limited:
 
-- RAD Plugin Converter uses a standard migration inventory and validation process. It adds the portable root manifest while retaining supported client files, and it checks skill and MCP configuration before writing changes.
+- RAD Plugin Converter creates new dual-format packages and uses a standard migration inventory for existing packages. It keeps portable metadata separate from client files and checks skill and MCP configuration before writing changes.
 - RAD Brainstorm uses familiar idea methods. Its specific focus is idea ownership: the user starts, each contribution has a source label, judgment happens later, and the result ends with a test threshold and stop signal.
 - RAD Plan resembles other planning assistants and spec templates. It adds bounded repository reading, one maintained plan, outcome coverage, safe recovery fields, rescue and replan paths, plus separate mechanical and judgment checks.
 - RAD Repo uses common repository instructions, handoffs, and Git checks. Its main difference is a small authority model and clone-local approval for repository validation commands.
@@ -68,6 +68,7 @@ The plugins do not require each other. RAD Brainstorm, RAD Plan, and RAD Repo me
 ## Example requests
 
 - "Audit this Codex plugin for Agent Plugins 1.0.0, then convert it in place."
+- "Create a new Agent Plugins 1.0.0 package with one starter skill."
 - "Run a quick brainstorm and let me give my ideas first."
 - "Create a full implementation plan from this repository."
 - "Run RAD Repo startup and show the next task."

@@ -3,13 +3,13 @@
   "name": "rad-plugin-converter",
   "version": "1.1.0",
   "description": "Create, audit, and convert plugin packages for Agent Plugins 1.0.0.",
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-plugin-converter",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
   "author": {
     "name": "RAD",
     "url": "https://github.com/radesjardins"
   },
-  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-plugin-converter",
-  "repository": "https://github.com/radesjardins/codex.skills",
-  "license": "MIT",
   "keywords": [
     "agent-plugins",
     "agent-skills",
