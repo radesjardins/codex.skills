@@ -1,0 +1,22 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "rad-para",
+  "version": "1.1.1",
+  "description": "Actively manage a PARA second brain with organization, audits, weekly reviews, progressive summarization, output assembly, session handoffs, and a 12 Favorite Problems capture filter.",
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-para",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "keywords": [
+    "para",
+    "second-brain",
+    "knowledge-management",
+    "productivity",
+    "progressive-summarization",
+    "pkm",
+    "tiago-forte"
+  ]
+}

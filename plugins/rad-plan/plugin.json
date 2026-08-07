@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "rad-plan",
+  "version": "7.1.0",
+  "description": "Evidence-based implementation planning for Codex with outcome coverage, safe recovery, focused linting, risk review, rescue, replan, and plan-audit workflows. It plans work and documentation; it does not implement application code.",
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-plan",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "keywords": [
+    "planner",
+    "planning",
+    "implementation-plan",
+    "risk-first",
+    "adversarial-review",
+    "plan-lint",
+    "stack-evaluation",
+    "project-rescue",
+    "release-map"
+  ]
+}

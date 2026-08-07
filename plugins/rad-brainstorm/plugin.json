@@ -1,0 +1,23 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "rad-brainstorm",
+  "version": "4.1.0",
+  "description": "User-led brainstorming for Codex. It keeps generation separate from evaluation and supports quick sessions, full sessions, problem framing, idea evaluation, and software design.",
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-brainstorm",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "keywords": [
+    "brainstorming",
+    "ideation",
+    "anti-anchoring",
+    "scamper",
+    "six-thinking-hats",
+    "five-whys",
+    "idea-evaluation",
+    "software-design"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "rad-repo",
+  "version": "3.1.0",
+  "description": "Small repository context, trusted validation contracts, handoffs, safe shipping, and on-demand code hotspot review for Codex.",
+  "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-repo",
+  "repository": "https://github.com/radesjardins/codex.skills",
+  "license": "MIT",
+  "author": {
+    "name": "RAD",
+    "url": "https://github.com/radesjardins"
+  },
+  "keywords": [
+    "repo-manager",
+    "session-management",
+    "startup",
+    "wrapup",
+    "ship",
+    "adopt",
+    "repo-init",
+    "repo-align",
+    "repo-doctor",
+    "complexity-audit",
+    "doc-shelf",
+    "context-stack",
+    "trust-report",
+    "deferred-ledger",
+    "drift-detection",
+    "context-handoff",
+    "agents-md",
+    "pre-ship",
+    "scoped-instructions",
+    "initiatives"
+  ]
+}
