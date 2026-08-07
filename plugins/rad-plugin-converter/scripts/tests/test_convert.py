@@ -133,6 +133,26 @@ class ConversionTests(unittest.TestCase):
             portable_mcp["mcpServers"]["local"]["args"],
         )
 
+    def test_claude_direct_mcp_map_is_converted(self) -> None:
+        root = self.make_codex_plugin()
+        self.write_json(
+            root,
+            ".mcp.json",
+            {
+                "video": {
+                    "command": "npx",
+                    "args": ["-y", "claude-video-vision@latest"],
+                }
+            },
+        )
+
+        result = convert_in_place(root)
+        portable_mcp = json.loads((root / "mcp.json").read_text(encoding="utf-8"))
+
+        self.assertTrue(result.successful)
+        self.assertEqual("stdio", portable_mcp["mcpServers"]["video"]["type"])
+        self.assertEqual("npx", portable_mcp["mcpServers"]["video"]["command"])
+
     def test_url_mcp_without_transport_requires_a_choice(self) -> None:
         root = self.make_codex_plugin()
         self.write_json(
@@ -189,6 +209,24 @@ class ConversionTests(unittest.TestCase):
         self.assertFalse(result.successful)
         self.assertEqual("keep\n", sentinel.read_text(encoding="utf-8"))
         self.assertIn("conversion-target-not-empty", {item.code for item in result.findings})
+
+    def test_failed_target_conversion_does_not_leave_partial_target(self) -> None:
+        source = self.base / "source"
+        source.mkdir()
+        self.write_json(
+            source,
+            ".claude-plugin/plugin.json",
+            {"name": "sample", "version": "1.0.0", "license": "MIT"},
+        )
+        self.write_json(source, ".mcp.json", {"remote": {"url": "https://example.com/mcp"}})
+        target = self.base / "target"
+
+        result = convert_to_target(source, target)
+
+        self.assertFalse(result.successful)
+        self.assertEqual([], result.changed_files)
+        self.assertFalse(target.exists())
+        self.assertIn("conversion-mcp-transport", {item.code for item in result.findings})
 
     def test_marketplace_is_read_only_without_apply(self) -> None:
         marketplace = self.base / "marketplace"

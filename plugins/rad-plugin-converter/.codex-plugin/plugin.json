@@ -1,7 +1,7 @@
 {
   "name": "rad-plugin-converter",
-  "version": "1.2.1",
-  "description": "Create, audit, convert, publish, and compare plugin packages for Agent Plugins 1.0.0.",
+  "version": "1.2.2",
+  "description": "Create, audit, and convert Agent Plugins 1.0.0 packages with guided publishing.",
   "author": {
     "name": "RAD",
     "url": "https://github.com/radesjardins"
@@ -17,21 +17,19 @@
     "codex",
     "plugin-conversion",
     "plugin-publishing",
-    "marketplace-sync",
     "migration"
   ],
   "interface": {
     "displayName": "RAD Plugin Converter",
-    "shortDescription": "Create, audit, publish, and compare Agent Plugins packages.",
-    "longDescription": "RAD Plugin Converter creates new dual-format packages, audits and converts existing packages, guides reviewed marketplace publishing, and compares shared packages across local marketplaces without copying unique packages.",
+    "shortDescription": "Create, audit, convert, and publish Agent Plugins packages.",
+    "longDescription": "RAD Plugin Converter creates new dual-format packages, audits and converts existing packages, and guides reviewed marketplace publishing.",
     "developerName": "RAD",
     "category": "Productivity",
     "capabilities": [
       "Plugin audits",
       "Plugin creation",
       "Plugin conversion",
-      "Plugin publishing",
-      "Marketplace sync checks",
+      "Guided plugin publishing",
       "Agent Skills validation",
       "MCP configuration checks"
     ],

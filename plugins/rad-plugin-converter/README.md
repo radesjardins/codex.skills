@@ -1,6 +1,6 @@
 # RAD Plugin Converter
 
-RAD Plugin Converter creates, audits, converts, publishes, and compares plugin packages for Agent Plugins 1.0.0.
+RAD Plugin Converter creates, audits, and converts plugin packages for Agent Plugins 1.0.0. Its publish skill guides reviewed marketplace, Git, client, and agent-visible release work.
 
 It is for plugin authors who need to move a Claude Code, Codex, mixed, legacy, or standalone Agent Skill package toward the portable format. It does not convert an ordinary application repository into a plugin.
 
@@ -40,12 +40,9 @@ python .\scripts\rad_plugin_converter.py convert <package-root> --in-place --jso
 python .\scripts\rad_plugin_converter.py convert <claude-source> --target <new-package-root> --json
 python .\scripts\rad_plugin_converter.py marketplace <marketplace-root> --json
 python .\scripts\rad_plugin_converter.py marketplace <marketplace-root> --apply --json
-python .\scripts\rad_plugin_converter.py sync-check <left-marketplace> <right-marketplace> --json
 ```
 
 `marketplace` is read-only unless `--apply` is present. The tool does not make network calls.
-
-`sync-check` is always read-only. It compares only packages that already exist in both marketplace roots. Packages unique to either side are reported without failing the check or copying files.
 
 ## Limits
 

@@ -210,10 +210,10 @@ def _convert_mcp(root: Path) -> tuple[dict[str, Any] | None, list[Finding]]:
     if read_finding is not None:
         return None, [read_finding]
     assert source is not None
-    servers = source.get("mcpServers")
+    servers = source.get("mcpServers") if "mcpServers" in source else source
     if not isinstance(servers, dict):
         return None, [
-            Finding("error", "conversion-mcp-servers", ".mcp.json", "mcpServers must be an object.")
+            Finding("error", "conversion-mcp-servers", ".mcp.json", "MCP servers must be an object.")
         ]
 
     converted: dict[str, Any] = {}
@@ -470,15 +470,23 @@ def convert_to_target(source_path: Path, target_path: Path) -> ConversionResult:
     if blocking:
         return ConversionResult(root=target, findings=blocking)
     try:
-        copied = _copy_source(source, target)
+        with tempfile.TemporaryDirectory(prefix="rad-plugin-converter-") as temp_name:
+            staging = Path(temp_name) / "package"
+            _copy_source(source, staging)
+            converted = convert_in_place(staging)
+            if not converted.successful:
+                converted.root = target
+                converted.changed_files = []
+                return converted
+            copied = _copy_source(staging, target)
     except OSError as exc:
         return ConversionResult(
             root=target,
             findings=[Finding("error", "conversion-copy", str(target), str(exc))],
         )
 
-    converted = convert_in_place(target)
-    converted.changed_files = list(dict.fromkeys(copied + converted.changed_files))
+    converted.root = target
+    converted.changed_files = copied
     return converted
 
 

@@ -9,7 +9,6 @@ from typing import Sequence
 from audit import audit_path
 from convert import create_plugin, convert_in_place, convert_marketplace, convert_to_target
 from models import AuditReport, ConversionResult
-from sync_check import SyncReport, compare_marketplaces
 
 
 def _print_audit(report: AuditReport, as_json: bool) -> None:
@@ -49,23 +48,9 @@ def _print_marketplace(results: list[ConversionResult], as_json: bool) -> None:
         _print_conversion(result, False)
 
 
-def _print_sync(report: SyncReport, as_json: bool) -> None:
-    if as_json:
-        print(json.dumps(report.to_dict(), indent=2))
-        return
-    print(f"Compared: {report.left} <-> {report.right}")
-    for package in report.shared:
-        state = "MATCH" if package.in_sync else "DRIFT"
-        print(f"{state} {package.name}")
-        for path in package.different_files:
-            print(f"  {path}")
-    print(f"Left only: {', '.join(report.left_only) if report.left_only else 'none'}")
-    print(f"Right only: {', '.join(report.right_only) if report.right_only else 'none'}")
-
-
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Create, audit, convert, publish, and compare plugins for Agent Plugins 1.0.0.",
+        description="Create, audit, and convert plugins for Agent Plugins 1.0.0.",
     )
     commands = parser.add_subparsers(dest="command", required=True)
 
@@ -96,13 +81,6 @@ def _parser() -> argparse.ArgumentParser:
     marketplace_parser.add_argument("--apply", action="store_true", help="Write safe conversion changes.")
     marketplace_parser.add_argument("--json", action="store_true", help="Emit JSON output.")
 
-    sync_parser = commands.add_parser(
-        "sync-check",
-        help="Compare packages that already exist in two local marketplaces without writing files.",
-    )
-    sync_parser.add_argument("left", type=Path)
-    sync_parser.add_argument("right", type=Path)
-    sync_parser.add_argument("--json", action="store_true", help="Emit JSON output.")
     return parser
 
 
@@ -129,13 +107,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         result = convert_in_place(args.path) if args.in_place else convert_to_target(args.path, args.target)
         _print_conversion(result, args.json)
         return 0 if result.successful else 1
-    if args.command == "marketplace":
-        results = convert_marketplace(args.path, args.apply)
-        _print_marketplace(results, args.json)
-        return 0 if all(result.successful for result in results) else 1
-    report = compare_marketplaces(args.left, args.right)
-    _print_sync(report, args.json)
-    return 0 if report.in_sync else 1
+    results = convert_marketplace(args.path, args.apply)
+    _print_marketplace(results, args.json)
+    return 0 if all(result.successful for result in results) else 1
 
 
 if __name__ == "__main__":

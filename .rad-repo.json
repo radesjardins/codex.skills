@@ -1,0 +1,10 @@
+{
+  "profile": "core",
+  "validation": {
+    "commands": [
+      "python -m unittest discover -s plugins/rad-plugin-converter/scripts/tests -p \"test_*.py\""
+    ],
+    "scopes": {},
+    "allow_empty": false
+  }
+}

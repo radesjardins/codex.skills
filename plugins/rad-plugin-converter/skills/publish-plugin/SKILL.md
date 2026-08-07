@@ -35,14 +35,6 @@ Identify the package root, target marketplace root, client, destination, version
 3. Review scripts, MCP commands, dependencies, license terms, and secret handling. Conformance does not prove package safety.
 4. Inspect an existing destination before replacement. Stop when it contains unreviewed differences or a version conflict. A changed published package needs a higher version under that repository's version policy.
 5. Find the canonical marketplace manifest and any required mirrors. Plan identical entries with the repository's existing schema and policy fields.
-6. If local instructions require comparison with another marketplace, run:
-
-   ```powershell
-   python ../../scripts/rad_plugin_converter.py sync-check <left-marketplace> <right-marketplace> --json
-   ```
-
-   Treat packages unique to either side as information. Never copy or register a unique package unless the user explicitly requested it.
-
 Show the target files and actions before writes when the original request did not already approve them.
 
 ## Publish

@@ -102,31 +102,5 @@ class CliTests(unittest.TestCase):
         self.assertEqual("created-plugin", portable["name"])
         self.assertTrue((target / "skills" / "create-sample" / "SKILL.md").is_file())
 
-    def test_sync_check_command_fails_only_for_shared_drift(self) -> None:
-        left = Path(self.temp_dir.name) / "left"
-        right = Path(self.temp_dir.name) / "right"
-        for root in (left, right):
-            shared = root / "plugins" / "shared"
-            shared.mkdir(parents=True)
-            (shared / "plugin.json").write_text('{"version":"1.0.0"}', encoding="utf-8")
-        unique = left / "plugins" / "left-only"
-        unique.mkdir(parents=True)
-        (unique / "plugin.json").write_text("left", encoding="utf-8")
-
-        matching = self.run_cli("sync-check", str(left), str(right), "--json")
-        matching_data = json.loads(matching.stdout)
-        (right / "plugins" / "shared" / "plugin.json").write_text(
-            '{"version":"2.0.0"}', encoding="utf-8"
-        )
-        drifted = self.run_cli("sync-check", str(left), str(right), "--json")
-        drifted_data = json.loads(drifted.stdout)
-
-        self.assertEqual(0, matching.returncode, matching.stderr)
-        self.assertTrue(matching_data["in_sync"])
-        self.assertEqual(["left-only"], matching_data["left_only"])
-        self.assertEqual(1, drifted.returncode, drifted.stderr)
-        self.assertFalse(drifted_data["in_sync"])
-
-
 if __name__ == "__main__":
     unittest.main()

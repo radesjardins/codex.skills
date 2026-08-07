@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "rad-plugin-converter",
-  "version": "1.2.1",
-  "description": "Create, audit, convert, publish, and compare plugin packages for Agent Plugins 1.0.0.",
+  "version": "1.2.2",
+  "description": "Create, audit, and convert Agent Plugins 1.0.0 packages with guided publishing.",
   "homepage": "https://github.com/radesjardins/codex.skills/tree/main/plugins/rad-plugin-converter",
   "repository": "https://github.com/radesjardins/codex.skills",
   "license": "MIT",
@@ -17,7 +17,6 @@
     "codex",
     "plugin-conversion",
     "plugin-publishing",
-    "marketplace-sync",
     "migration"
   ]
 }
